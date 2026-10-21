@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E6EAE9;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}*::-webkit-scrollbar{display:none}button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}a{color:#0F6670}a:hover{color:#0B4F57}input{font-family:inherit}@keyframes dcShimmer{0%{background-position:-240px 0}100%{background-position:240px 0}}@keyframes dcScan{0%{top:8%}50%{top:88%}100%{top:8%}}@keyframes dcBlink{0%,80%,100%{opacity:.25}40%{opacity:1}}@keyframes dcPop{0%{transform:translateY(10px);opacity:0}100%{transform:none;opacity:1}}</style>
+</helmet>
+<div style="--bg:#F4F6F5;--card:#FFFFFF;--card2:#EEF2F1;--ink:#0F1D1E;--ink2:#55676A;--line:#E1E7E6;--track:#E6ECEB;--pri:#0F6670;--priSoft:#DDEEEF;--priInk:#0B4F57;--onPri:#FFFFFF;--amb:#8F5400;--ambSoft:#FFF1D6;--ambLine:#F0C77A;--ph1:#E7ECEB;--ph2:#F1F4F3;--bar:rgba(255,255,255,.9);--shadow:0 1px 2px rgba(15,29,30,.04), 0 8px 24px rgba(15,29,30,.05);--mP:oklch(0.6 0.13 255);--mC:oklch(0.7 0.12 75);--mG:oklch(0.6 0.13 330);--mF:oklch(0.62 0.12 150);min-height:100vh;padding:48px 56px 96px;font-family:Figtree, sans-serif;color:#0F1D1E">
+
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-end;justify-content:space-between;margin-bottom:40px;max-width:2700px;position:relative;z-index:2">
+<div style="display:flex;flex-direction:column;gap:10px;max-width:760px">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:36px;border-radius:12px;background:#0F6670;display:flex;align-items:center;justify-content:center"><div style="width:16px;height:16px;border-radius:50%;border:3px solid #fff"></div></div><span style="font:800 30px/1 'Bricolage Grotesque', sans-serif;letter-spacing:-.02em">Leve</span><span style="font:500 14px Figtree;color:#55676A">acompanhamento de emagrecimento · PWA 390×844</span></div>
+<p style="margin:0;font:400 15px/1.55 Figtree;color:#3D4E50;text-wrap:pretty">Premissas: o plano do nutrólogo é a fonte das metas (1.800 kcal · P 130 g · C 180 g · G 55 g · F 30 g). Tudo é interativo — mova os sliders da análise, responda as perguntas e confirme o almoço: o anel em <strong>Hoje</strong> anima e o <strong>Diário</strong> recalcula. Âmbar sinaliza atenção; não há vermelho em nenhum estado.</p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;flex:none">
+<button onClick="{{ toggleProto }}" style="height:44px;padding:0 18px;border-radius:22px;border:0;background:#0F1D1E;color:#fff;font:600 14px Figtree">{{ protoLabel }}</button>
+<button onClick="{{ toggleDark }}" style="height:44px;padding:0 18px;border-radius:22px;border:1px solid #C9D2D1;background:#fff;color:#0F1D1E;font:600 14px Figtree">{{ darkLabel }}</button>
+<button onClick="{{ toggleAccent }}" style="height:44px;padding:0 18px;border-radius:22px;border:1px solid #C9D2D1;background:#fff;color:#0F1D1E;font:600 14px Figtree">{{ accentLabel }}</button>
+</div>
+</div>
+
+<div style="clear:both"></div>
+<div style="{{ themeVars }}">
+<div style="display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start;justify-content:{{ rowJustify }}">
+
+<sc-if value="{{ vis.analise }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">03</span>Análise da foto<span style="font-weight:500;color:#55676A">· fluxo principal</span></div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:190px">
+<div style="position:relative;height:340px;background:repeating-linear-gradient(135deg,var(--ph1) 0 10px,var(--ph2) 10px 20px);overflow:hidden">
+<div style="position:absolute;left:0;right:0;bottom:52px;text-align:center;font:500 11px 'JetBrains Mono', monospace;color:var(--ink2)">foto do prato · almoço · 12:41</div>
+<div style="position:absolute;top:58px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center;z-index:5">
+<button onClick="{{ goRegistrar }}" aria-label="Voltar" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card);color:var(--ink);font:600 22px Figtree;box-shadow:var(--shadow)">‹</button>
+<div style="height:36px;padding:0 14px;border-radius:18px;background:var(--card);display:flex;align-items:center;font:600 13px Figtree;box-shadow:var(--shadow)">Almoço · 12:41</div>
+<button onClick="{{ restartAnalysis }}" style="height:44px;padding:0 14px;border-radius:22px;border:0;background:var(--card);color:var(--ink);font:600 13px Figtree;box-shadow:var(--shadow)">Refazer</button>
+</div>
+<sc-if value="{{ analyzing }}" hint-placeholder-val="{{ false }}">{{ scanLine }}</sc-if>
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ tags }}" as="t" hint-placeholder-count="4">
+<div style="position:absolute;left:{{ t.l }};top:{{ t.t }};display:flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 8px;border-radius:14px;background:var(--card);box-shadow:0 4px 12px rgba(0,0,0,.12);font:600 12px Figtree;color:var(--ink);animation:dcPop .4s ease both"><span style="width:8px;height:8px;border-radius:4px;background:{{ t.dot }}"></span>{{ t.name }}<span style="color:var(--ink2);font-weight:500">{{ t.conf }}</span></div>
+</sc-for>
+</sc-if>
+</div>
+
+<div style="position:relative;margin-top:-28px;background:var(--bg);border-radius:28px 28px 0 0;padding:12px 20px 0;display:flex;flex-direction:column;gap:16px">
+<div style="width:40px;height:5px;border-radius:3px;background:var(--line);align-self:center"></div>
+
+<sc-if value="{{ analyzing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:700 22px 'Bricolage Grotesque', sans-serif">Identificando alimentos…</div><div style="font:400 14px Figtree;color:var(--ink2)">Estimando porções a partir da foto. Leva alguns segundos.</div></div>
+{{ skeleton }}
+</sc-if>
+
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--card);border-radius:24px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div><div style="font:600 13px Figtree;color:var(--ink2)">Total do prato</div><div style="display:flex;align-items:baseline;gap:6px"><span style="font:800 46px/1.05 'Bricolage Grotesque', sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ tot.kcal }}</span><span style="font:600 15px Figtree;color:var(--ink2)">kcal</span></div></div>
+<div style="padding:8px 12px;border-radius:14px;background:{{ cmp.bg }};color:{{ cmp.fg }};font:700 13px/1.2 Figtree;max-width:150px;text-align:right">{{ cmp.headline }}</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mP)"></span>Proteína</span><span style="font:700 17px Figtree">{{ tot.p }} g</span></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mC)"></span>Carbo</span><span style="font:700 17px Figtree">{{ tot.c }} g</span></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mG)"></span>Gordura</span><span style="font:700 17px Figtree">{{ tot.g }} g</span></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mF)"></span>Fibra</span><span style="font:700 17px Figtree">{{ tot.f }} g</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px">
+<div style="font:600 13px Figtree;color:var(--ink2)">{{ cmpTitle }}</div>
+<sc-for list="{{ cmp.rows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:10px;font:500 14px Figtree"><span style="width:8px;height:8px;border-radius:4px;background:{{ r.dot }}"></span><span style="flex:1">{{ r.label }}</span><span style="color:var(--ink2);font-variant-numeric:tabular-nums">{{ r.val }}</span><span style="min-width:84px;text-align:right;font-weight:700;color:{{ r.fg }}">{{ r.note }}</span></div>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ hasOpenQs }}" hint-placeholder-val="{{ true }}">
+<div style="font:700 17px Figtree;margin-top:4px">Duas perguntas rápidas</div>
+</sc-if>
+<sc-for list="{{ qs }}" as="q" hint-placeholder-count="2">
+<div style="background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ q.open }}" hint-placeholder-val="{{ true }}">
+<div style="font:600 15px/1.35 Figtree">{{ q.text }}</div>
+<div style="display:flex;gap:8px">
+<sc-for list="{{ q.opts }}" as="o" hint-placeholder-count="2">
+<button onClick="{{ o.onPick }}" style="flex:1;height:44px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 14px Figtree">{{ o.label }}</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ q.done }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:24px;height:24px;border-radius:12px;background:var(--priSoft);color:var(--priInk);display:flex;align-items:center;justify-content:center;font:700 13px Figtree">✓</span><span style="flex:1;font:500 14px Figtree;color:var(--ink2)">{{ q.short }} <strong style="color:var(--ink)">{{ q.ans }}</strong></span><button onClick="{{ q.onReopen }}" style="height:36px;padding:0 10px;border:0;background:none;color:var(--pri);font:600 13px Figtree">alterar</button></div>
+</sc-if>
+</div>
+</sc-for>
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><span style="font:700 17px Figtree">Alimentos identificados</span><span style="font:500 13px Figtree;color:var(--ink2)">{{ itemsCount }}</span></div>
+<sc-for list="{{ items }}" as="it" hint-placeholder-count="4">
+<div style="background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<span style="width:10px;height:10px;border-radius:5px;background:{{ it.dot }};margin-top:6px;flex:none"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px"><div style="font:600 16px/1.25 Figtree">{{ it.name }}</div><div style="display:flex"><span style="padding:3px 8px;border-radius:8px;background:{{ it.confBg }};color:{{ it.confFg }};font:600 12px Figtree">{{ it.confText }}</span></div></div>
+<div style="text-align:right"><div style="font:700 20px 'Bricolage Grotesque', sans-serif;font-variant-numeric:tabular-nums">{{ it.kcal }}</div><div style="font:500 12px Figtree;color:var(--ink2)">kcal</div></div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<button onClick="{{ it.minus }}" aria-label="Diminuir porção" style="width:44px;height:44px;flex:none;border-radius:22px;border:0;background:var(--card2);color:var(--ink);font:600 20px Figtree">−</button>
+<input type="range" min="0" max="{{ it.max }}" step="{{ it.step }}" value="{{ it.grams }}" onChange="{{ it.onSlide }}" aria-label="Porção em gramas" style="flex:1;min-width:0;height:44px;accent-color:var(--pri)">
+<button onClick="{{ it.plus }}" aria-label="Aumentar porção" style="width:44px;height:44px;flex:none;border-radius:22px;border:0;background:var(--card2);color:var(--ink);font:600 20px Figtree">+</button>
+<div style="display:flex;align-items:center;gap:4px;height:44px;padding:0 10px;border-radius:12px;border:1.5px solid var(--line);flex:none"><input type="number" value="{{ it.grams }}" onChange="{{ it.onField }}" aria-label="Gramas" style="width:40px;border:0;background:none;color:var(--ink);font:700 15px Figtree;text-align:right;outline:none"><span style="font:500 13px Figtree;color:var(--ink2)">g</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="flex:1;font:500 13px Figtree;color:var(--ink2);font-variant-numeric:tabular-nums">P {{ it.p }} · C {{ it.c }} · G {{ it.g }} · F {{ it.f }} g</span><button onClick="{{ it.onCorrect }}" style="height:36px;padding:0 12px;border-radius:18px;border:1.5px solid var(--line);background:none;color:var(--ink);font:600 13px Figtree">{{ it.correctLabel }}</button></div>
+<sc-if value="{{ it.correcting }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--card2);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px Figtree;color:var(--ink2)">Era outro alimento?</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ it.alts }}" as="a" hint-placeholder-count="2">
+<button onClick="{{ a.onPick }}" style="height:40px;padding:0 14px;border-radius:20px;border:0;background:var(--card);color:var(--ink);font:600 13px Figtree;box-shadow:var(--shadow)">{{ a.name }}</button>
+</sc-for>
+<button onClick="{{ goRegistrar }}" style="height:40px;padding:0 14px;border-radius:20px;border:1.5px dashed var(--line);background:none;color:var(--ink);font:600 13px Figtree">Buscar outro</button>
+</div>
+<button onClick="{{ it.onRemove }}" style="align-self:flex-start;height:36px;padding:0;border:0;background:none;color:var(--amb);font:600 13px Figtree">Não estava no prato · remover</button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<button onClick="{{ goRegistrar }}" style="height:52px;border-radius:16px;border:1.5px dashed var(--line);background:none;color:var(--ink);font:600 14px Figtree">+ Adicionar item que a foto não pegou</button>
+<div style="display:flex;gap:10px;padding:12px 14px;border-radius:14px;background:var(--card2);font:400 12.5px/1.45 Figtree;color:var(--ink2)"><span style="flex:none;width:18px;height:18px;border-radius:9px;border:1.5px solid var(--ink2);display:flex;align-items:center;justify-content:center;font:700 10px Figtree">i</span><span>Estimativas por foto são aproximadas. Ajustes na dieta devem ser validados com seu nutrólogo.</span></div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 28px;background:var(--bar);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;z-index:20">
+<button onClick="{{ confirmMeal }}" style="height:56px;border-radius:18px;border:0;background:var(--pri);color:var(--onPri);font:700 16px Figtree;display:flex;align-items:center;justify-content:center;gap:8px">Comi isso, adicionar ao dia<span style="opacity:.8;font-weight:600">· {{ tot.kcal }} kcal</span></button>
+<button onClick="{{ discardMeal }}" style="height:46px;border-radius:16px;border:0;background:none;color:var(--ink);font:600 15px Figtree">Não comi / descartar</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ confirmed }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(8,18,18,.4);z-index:35;display:flex;align-items:flex-end">
+<div style="width:100%;background:var(--card);border-radius:32px 32px 0 0;padding:28px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;animation:dcPop .35s ease both">
+<div style="width:64px;height:64px;border-radius:32px;background:var(--priSoft);color:var(--pri);display:flex;align-items:center;justify-content:center;font:700 28px Figtree">✓</div>
+<div style="font:700 24px 'Bricolage Grotesque', sans-serif">Almoço adicionado</div>
+<div style="font:400 15px/1.5 Figtree;color:var(--ink2)">+{{ lastAddKcal }} kcal no seu dia. Restam <strong style="color:var(--ink)">{{ ring.remaining }} kcal</strong> para a meta de hoje.</div>
+<div style="display:flex;gap:8px;width:100%;margin-top:10px">
+<button onClick="{{ restartAnalysis }}" style="flex:1;height:52px;border-radius:16px;border:1.5px solid var(--line);background:none;color:var(--ink);font:600 15px Figtree">Registrar outra</button>
+<button onClick="{{ goHoje }}" style="flex:1;height:52px;border-radius:16px;border:0;background:var(--pri);color:var(--onPri);font:700 15px Figtree">Ver meu dia</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ discarded }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:var(--bg);z-index:35;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;text-align:center">
+<div style="width:96px;height:96px;border-radius:48px;background:var(--card2);display:flex;align-items:center;justify-content:center"><div style="width:40px;height:40px;border-radius:20px;border:3px solid var(--ink2)"></div></div>
+<div style="font:700 24px 'Bricolage Grotesque', sans-serif">Tudo certo, nada foi somado</div>
+<div style="font:400 15px/1.5 Figtree;color:var(--ink2);max-width:280px">A foto foi descartada e seu dia continua igual. Se quiser, registre de outro jeito.</div>
+<div style="display:flex;flex-direction:column;gap:8px;width:100%;margin-top:12px">
+<button onClick="{{ restartAnalysis }}" style="height:52px;border-radius:16px;border:0;background:var(--pri);color:var(--onPri);font:700 15px Figtree">Tirar outra foto</button>
+<button onClick="{{ goHoje }}" style="height:52px;border-radius:16px;border:0;background:none;color:var(--ink);font:600 15px Figtree">Voltar para Hoje</button>
+</div>
+</div>
+</sc-if>
+</div></div></div>
+</sc-if>
+
+<sc-if value="{{ vis.hoje }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">01</span>Hoje<span style="font-weight:500;color:#55676A">· home</span></div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink);background:var(--bg)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:60px 20px 120px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px">
+<div><div style="font:500 14px Figtree;color:var(--ink2)">Quarta, 21 de outubro</div><div style="font:700 30px/1.15 'Bricolage Grotesque', sans-serif;letter-spacing:-.01em">Olá, Rafael</div></div>
+<button onClick="{{ goPlano }}" aria-label="Meu plano e perfil" style="width:46px;height:46px;border-radius:23px;border:0;background:var(--priSoft);color:var(--priInk);display:flex;align-items:center;justify-content:center;font:700 15px Figtree">RA</button>
+</div>
+
+<div style="position:relative;background:var(--card);border-radius:28px;padding:20px 22px 22px;box-shadow:var(--shadow)">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 16px Figtree">Calorias</span><span style="padding:5px 10px;border-radius:10px;background:var(--card2);font:600 12px Figtree;color:var(--ink2)">{{ planBadge }}</span></div>
+<div style="position:relative;width:224px;height:224px;margin:10px auto 6px">
+<svg width="224" height="224" viewBox="0 0 224 224" style="transform:rotate(-90deg);display:block"><circle cx="112" cy="112" r="96" fill="none" stroke="var(--track)" stroke-width="18"></circle><circle cx="112" cy="112" r="96" fill="none" stroke="{{ ring.color }}" stroke-width="18" stroke-linecap="round" stroke-dasharray="603.19" stroke-dashoffset="{{ ring.offset }}" style="transition:stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1), stroke .4s"></circle></svg>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font:600 12px Figtree;color:var(--ink2);letter-spacing:.04em;text-transform:uppercase">Consumido</span><span style="font:800 54px/1 'Bricolage Grotesque', sans-serif;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ ring.shown }}</span><span style="font:500 14px Figtree;color:var(--ink2)">de {{ metaK }} kcal</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center">
+<div><div style="font:700 20px 'Bricolage Grotesque', sans-serif;color:{{ ring.remColor }};font-variant-numeric:tabular-nums">{{ ring.remaining }}</div><div style="font:500 12px Figtree;color:var(--ink2)">{{ ring.remLabel }}</div></div>
+<div style="border-left:1px solid var(--line);border-right:1px solid var(--line)"><div style="font:700 20px 'Bricolage Grotesque', sans-serif">{{ metaK }}</div><div style="font:500 12px Figtree;color:var(--ink2)">meta kcal</div></div>
+<div><div style="font:700 20px 'Bricolage Grotesque', sans-serif">{{ mealsDone }}</div><div style="font:500 12px Figtree;color:var(--ink2)">refeições</div></div>
+</div>
+<sc-if value="{{ ring.over }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;padding:10px 12px;border-radius:14px;background:var(--ambSoft);color:var(--amb);font:500 13px/1.4 Figtree">Você passou um pouco da meta hoje. Tudo bem — o que conta é a tendência da semana.</div></sc-if>
+<sc-if value="{{ toastHoje }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:56px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:18px;background:var(--pri);color:var(--onPri);font:700 13px Figtree;white-space:nowrap;animation:dcPop .35s ease both;box-shadow:0 8px 20px -8px var(--pri)">{{ toastHoje }}</div></sc-if>
+</div>
+
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ macros }}" as="m" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;align-items:baseline;gap:8px"><span style="font:600 14px Figtree;flex:1">{{ m.label }}</span><span style="font:700 14px Figtree;font-variant-numeric:tabular-nums">{{ m.val }}<span style="font-weight:500;color:var(--ink2)"> / {{ m.meta }} g</span></span></div>
+<div style="height:10px;border-radius:5px;background:var(--track);overflow:hidden"><div style="height:100%;width:{{ m.pct }};border-radius:5px;background:{{ m.color }};transition:width 1.2s cubic-bezier(.2,.8,.2,1)"></div></div>
+<span style="font:500 12px Figtree;color:var(--ink2)">{{ m.note }}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 16px Figtree">Água</span><span style="font:700 15px Figtree;font-variant-numeric:tabular-nums">{{ waterText }}<span style="font-weight:500;color:var(--ink2)"> / 2 L</span></span></div>
+<div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px">
+<sc-for list="{{ cups }}" as="cup" hint-placeholder-count="8">
+<button onClick="{{ cup.onClick }}" aria-label="{{ cup.label }}" style="height:48px;border:0;border-radius:10px 10px 14px 14px;background:{{ cup.bg }};position:relative;overflow:hidden;padding:0"><div style="position:absolute;left:0;right:0;bottom:0;height:{{ cup.fill }};background:var(--pri);opacity:.85;transition:height .3s"></div></button>
+</sc-for>
+</div>
+<div style="display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:12px">
+<span style="font:700 16px Figtree;flex:1">Passos</span><span style="font:700 15px Figtree">6.240<span style="font-weight:500;color:var(--ink2)"> / 8.000</span></span>
+</div>
+<div style="height:8px;border-radius:4px;background:var(--track);overflow:hidden;margin-top:-4px"><div style="height:100%;width:78%;background:var(--ink);opacity:.75;border-radius:4px"></div></div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px"><span style="font:700 18px Figtree">{{ mealsTitle }}</span><button onClick="{{ goPlano }}" style="height:36px;padding:0 4px;border:0;background:none;color:var(--pri);font:600 13px Figtree">{{ planLink }}</button></div>
+<sc-for list="{{ planMeals }}" as="pm" hint-placeholder-count="5">
+<div style="background:var(--card);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;border:1.5px solid {{ pm.border }}">
+<div style="width:46px;flex:none;font:600 13px Figtree;color:var(--ink2);font-variant-numeric:tabular-nums">{{ pm.time }}</div>
+<div style="flex:1;min-width:0"><div style="font:600 15px Figtree">{{ pm.name }}</div><div style="font:500 13px Figtree;color:var(--ink2)">{{ pm.sub }}</div></div>
+<sc-if value="{{ pm.isNext }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goRegistrar }}" style="height:44px;padding:0 16px;border-radius:14px;border:0;background:var(--pri);color:var(--onPri);font:700 14px Figtree">Registrar</button></sc-if>
+<sc-if value="{{ pm.showBadge }}" hint-placeholder-val="{{ true }}"><span style="padding:5px 10px;border-radius:10px;background:{{ pm.bg }};color:{{ pm.fg }};font:700 12px Figtree;white-space:nowrap">{{ pm.status }}</span></sc-if>
+</div>
+</sc-for>
+
+<div style="background:var(--priSoft);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:12px;margin-top:4px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:12px;background:var(--pri);display:flex;align-items:center;justify-content:center"><div style="width:12px;height:12px;border-radius:6px;border:2.5px solid var(--onPri)"></div></div><span style="font:700 14px Figtree;color:var(--priInk)">Dica do agente</span></div>
+<div style="font:500 15px/1.5 Figtree;color:var(--ink)">Você bateu a meta de proteína 4 dias seguidos. No almoço de hoje, a porção de frango do plano (120–150 g) já garante metade do que falta.</div>
+<button onClick="{{ goAgente }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:14px;border:0;background:var(--card);color:var(--ink);font:600 14px Figtree">Conversar</button>
+</div>
+</div>
+<dc-import name="TabBar" active="hoje" on-nav="{{ navTo }}" hint-size="390px,90px" style="position:absolute;left:0;right:0;bottom:0;height:90px;z-index:25"></dc-import>
+</div></div></div>
+</sc-if>
+
+<sc-if value="{{ vis.registrar }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">02</span>Registrar refeição<span style="font-weight:500;color:#55676A">· botão +</span></div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink);background:var(--bg)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:60px 20px 150px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-top:6px">
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 28px/1.15 'Bricolage Grotesque', sans-serif">O que você comeu?</span><span style="font:500 13.5px/1.4 Figtree;color:var(--ink2)">{{ regCtx }}</span></div>
+<button onClick="{{ goHoje }}" aria-label="Fechar" style="width:44px;height:44px;flex:none;border-radius:22px;border:0;background:var(--card2);color:var(--ink);font:500 22px Figtree">×</button>
+</div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px">
+<sc-for list="{{ regMeals }}" as="rm" hint-placeholder-count="5">
+<button onClick="{{ rm.onClick }}" style="flex:none;height:40px;padding:0 14px;border-radius:20px;border:1.5px solid {{ rm.border }};background:{{ rm.bg }};color:{{ rm.fg }};font:600 14px Figtree">{{ rm.label }}</button>
+</sc-for>
+</div>
+
+<div style="position:relative;height:250px;border-radius:28px;overflow:hidden;background:repeating-linear-gradient(135deg,#1B2526 0 10px,#212C2D 10px 20px);color:#fff">
+<div style="position:absolute;top:16px;left:0;right:0;text-align:center;font:600 13px Figtree;color:rgba(255,255,255,.92)">Enquadre o prato inteiro, de cima</div>
+<div style="position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:170px;height:120px">
+<span style="position:absolute;left:0;top:0;border-top-width:3px;border-left-width:3px;border-top-left-radius:10px;width:26px;height:26px;border-color:rgba(255,255,255,.9);border-style:solid;border-width:0"></span><span style="position:absolute;right:0;top:0;border-top-width:3px;border-right-width:3px;border-top-right-radius:10px;width:26px;height:26px;border-color:rgba(255,255,255,.9);border-style:solid;border-width:0"></span><span style="position:absolute;left:0;bottom:0;border-bottom-width:3px;border-left-width:3px;border-bottom-left-radius:10px;width:26px;height:26px;border-color:rgba(255,255,255,.9);border-style:solid;border-width:0"></span><span style="position:absolute;right:0;bottom:0;border-bottom-width:3px;border-right-width:3px;border-bottom-right-radius:10px;width:26px;height:26px;border-color:rgba(255,255,255,.9);border-style:solid;border-width:0"></span>
+<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:500 10px 'JetBrains Mono', monospace;color:rgba(255,255,255,.55)">visor da câmera</span>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 22px">
+<button onClick="{{ goAnalise }}" style="justify-self:start;height:44px;padding:0 14px;border-radius:22px;border:0;background:rgba(255,255,255,.16);color:#fff;font:600 13px Figtree;display:flex;align-items:center;gap:8px"><span style="width:14px;height:11px;border-radius:3px;border:2px solid #fff"></span>Galeria</button>
+<button onClick="{{ goAnalise }}" aria-label="Tirar foto" style="width:74px;height:74px;border-radius:37px;border:4px solid #fff;background:transparent;padding:4px"><span style="display:block;width:100%;height:100%;border-radius:50%;background:var(--pri)"></span></button>
+<span style="justify-self:end;font:600 12px Figtree;color:rgba(255,255,255,.85);text-align:right;max-width:90px;line-height:1.3">IA estima as porções</span>
+</div>
+</div>
+
+<div style="background:var(--card);border-radius:22px;padding:8px 8px 8px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:8px"><input value="{{ mealText }}" onChange="{{ onMealText }}" placeholder="Ou descreva: arroz, feijão e frango…" style="flex:1;min-width:0;height:44px;border:0;background:none;outline:none;color:var(--ink);font:500 15px Figtree"><button onClick="{{ onMic }}" aria-label="Falar" style="width:44px;height:44px;flex:none;border-radius:22px;border:0;background:var(--priSoft);display:flex;align-items:center;justify-content:center"><span style="width:10px;height:16px;border-radius:5px;background:var(--priInk)"></span></button></div>
+<sc-if value="{{ hasMealText }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goAnalise }}" style="height:44px;border-radius:14px;border:0;background:var(--pri);color:var(--onPri);font:700 14px Figtree;margin-right:0">Analisar descrição</button></sc-if>
+</div>
+
+<div style="display:flex;gap:8px">
+<div style="flex:1;height:52px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;padding:0 14px"><div style="width:14px;height:14px;border-radius:7px;border:2px solid var(--ink2);flex:none"></div><input ref="{{ searchRef }}" value="{{ query }}" onChange="{{ onQuery }}" placeholder="Buscar alimento ou marca" style="flex:1;min-width:0;border:0;background:none;outline:none;color:var(--ink);font:500 16px Figtree"></div>
+<button onClick="{{ onBarcode }}" aria-label="Ler código de barras" style="width:52px;height:52px;flex:none;border-radius:16px;border:0;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:2px;padding:0 13px"><div style="width:2px;height:20px;background:var(--ink)"></div><div style="width:4px;height:20px;background:var(--ink)"></div><div style="width:2px;height:20px;background:var(--ink)"></div><div style="width:3px;height:20px;background:var(--ink)"></div><div style="width:2px;height:20px;background:var(--ink)"></div><div style="width:4px;height:20px;background:var(--ink)"></div></button>
+</div>
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;padding:4px;border-radius:14px;background:var(--card2)">
+<sc-for list="{{ regTabs }}" as="tb" hint-placeholder-count="3"><button onClick="{{ tb.onClick }}" style="flex:1;height:38px;border-radius:10px;border:0;background:{{ tb.bg }};color:var(--ink);font:600 13.5px Figtree;box-shadow:{{ tb.sh }}">{{ tb.label }}</button></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ showSearchTitle }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 15px Figtree">Resultados</span><span style="font:500 12px Figtree;color:var(--ink2)">TACO · Open Food Facts</span></div></sc-if>
+
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+<sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-top:1px solid {{ r.border }}">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font:600 15px Figtree">{{ r.name }}</div><div style="display:flex;align-items:center;gap:6px;font:500 13px Figtree;color:var(--ink2)"><span>{{ r.portion }} · {{ r.kcal }} kcal</span><span style="padding:1px 5px;border-radius:5px;background:var(--card2);font:500 9.5px 'JetBrains Mono', monospace">{{ r.src }}</span></div></div>
+<sc-if value="{{ r.notIn }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.onAdd }}" aria-label="Adicionar" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--priSoft);color:var(--priInk);font:600 20px Figtree">+</button></sc-if>
+<sc-if value="{{ r.inTray }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:2px;height:44px;border-radius:22px;background:var(--pri);color:var(--onPri)"><button onClick="{{ r.onDec }}" aria-label="Menos" style="width:40px;height:44px;border:0;background:none;color:var(--onPri);font:600 18px Figtree">−</button><span style="min-width:18px;text-align:center;font:700 15px Figtree">{{ r.qty }}</span><button onClick="{{ r.onAdd }}" aria-label="Mais" style="width:40px;height:44px;border:0;background:none;color:var(--onPri);font:600 18px Figtree">+</button></div></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:22px 16px;text-align:center;font:500 14px/1.5 Figtree;color:var(--ink2)">Nada encontrado para “{{ query }}”. Tente outro nome ou leia o código de barras.</div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPlanTab }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;border:1.5px solid var(--pri)">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font:700 16px Figtree">{{ planCard.title }}</span><span style="font:700 14px Figtree;white-space:nowrap">~{{ planCard.kcal }} kcal</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ planCard.items }}" as="pi" hint-placeholder-count="3"><span style="display:flex;gap:10px;font:500 14px/1.4 Figtree"><span style="width:6px;height:6px;border-radius:3px;background:var(--pri);margin-top:7px;flex:none"></span>{{ pi.t }}</span></sc-for></div>
+<button onClick="{{ addPlanMeal }}" style="height:48px;border-radius:14px;border:0;background:var(--pri);color:var(--onPri);font:700 14px Figtree">Comi exatamente isso</button>
+<span style="font:500 12px Figtree;color:var(--ink2)">Comeu diferente? Tire uma foto ou busque os itens — o Leve compara com o plano.</span>
+</div>
+</sc-if>
+
+<button onClick="{{ repeatYesterday }}" style="border:0;background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:12px 14px;display:flex;align-items:center;gap:12px;text-align:left;color:var(--ink)"><div style="width:44px;height:44px;border-radius:14px;background:var(--card2);flex:none;display:flex;align-items:center;justify-content:center;font:700 18px Figtree">↻</div><div style="flex:1;min-width:0"><div style="font:600 15px Figtree">Repetir {{ regMealName }} de ontem</div><div style="font:500 13px Figtree;color:var(--ink2)">Arroz, feijão, patinho e legumes · 590 kcal</div></div></button>
+</div>
+
+<sc-if value="{{ hasTray }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:12px;right:12px;bottom:28px;z-index:25;padding:10px 10px 10px 18px;border-radius:22px;background:var(--ink);color:var(--bg);display:flex;align-items:center;gap:12px;box-shadow:0 16px 32px -12px rgba(0,0,0,.4);animation:dcPop .3s ease both">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:700 15px Figtree">{{ trayKcal }} kcal · {{ trayCount }}</span><span style="font:500 12px Figtree;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ trayNames }}</span></div>
+<button onClick="{{ clearTray }}" style="height:44px;padding:0 10px;border:0;background:none;color:var(--bg);font:600 13px Figtree;opacity:.8">Limpar</button>
+<button onClick="{{ confirmTray }}" style="height:48px;padding:0 16px;border-radius:16px;border:0;background:var(--pri);color:var(--onPri);font:700 14px Figtree">Adicionar ao dia</button>
+</div>
+</sc-if>
+<sc-if value="{{ toastReg }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:20px;right:20px;top:60px;padding:14px 16px;border-radius:16px;background:var(--ink);color:var(--bg);font:600 14px Figtree;z-index:30;animation:dcPop .3s ease both">{{ toastReg }}</div></sc-if>
+</div></div></div>
+</sc-if>
+
+<sc-if value="{{ vis.diario }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">04</span>Diário</div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink);background:var(--bg)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:60px 20px 120px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px"><span style="font:700 30px 'Bricolage Grotesque', sans-serif">Diário</span>
+<div style="display:flex;padding:4px;border-radius:14px;background:var(--card2)"><button onClick="{{ setDia }}" style="height:36px;padding:0 14px;border-radius:10px;border:0;background:{{ seg.diaBg }};color:var(--ink);font:600 14px Figtree;box-shadow:{{ seg.diaSh }}">Dia</button><button onClick="{{ setSemana }}" style="height:36px;padding:0 14px;border-radius:10px;border:0;background:{{ seg.semBg }};color:var(--ink);font:600 14px Figtree;box-shadow:{{ seg.semSh }}">Semana</button></div>
+</div>
+
+<sc-if value="{{ isDayView }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:8px">
+<button onClick="{{ prevDay }}" aria-label="Dia anterior" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card);box-shadow:var(--shadow);color:var(--ink);font:600 20px Figtree">‹</button>
+<div style="flex:1;text-align:center"><div style="font:700 17px Figtree">{{ day.label }}</div><div style="font:500 13px Figtree;color:var(--ink2)">{{ day.sub }}</div></div>
+<button onClick="{{ nextDay }}" aria-label="Próximo dia" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card);box-shadow:var(--shadow);color:var(--ink);font:600 20px Figtree">›</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+<sc-for list="{{ strip }}" as="s" hint-placeholder-count="7">
+<button onClick="{{ s.onClick }}" style="height:84px;border:0;border-radius:16px;background:{{ s.bg }};display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 0;color:{{ s.fg }}"><span style="font:600 11px Figtree;opacity:.8">{{ s.d }}</span><span style="font:700 16px Figtree">{{ s.n }}</span><span style="width:20px;height:24px;display:flex;align-items:flex-end"><span style="width:100%;height:{{ s.h }};border-radius:3px;background:{{ s.bar }}"></span></span></button>
+</sc-for>
+</div>
+
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:600 13px Figtree;color:var(--ink2)">Total do dia</span><span style="font:600 13px Figtree;color:{{ dayTot.statusFg }}">{{ dayTot.status }}</span></div>
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font:800 40px/1 'Bricolage Grotesque', sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ dayTot.kcal }}</span><span style="font:600 15px Figtree;color:var(--ink2)">/ {{ metaK }} kcal</span></div>
+<div style="height:8px;border-radius:4px;background:var(--track);overflow:hidden"><div style="height:100%;width:{{ dayTot.pct }};background:{{ dayTot.bar }};border-radius:4px;transition:width .6s"></div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<span style="padding:5px 9px;border-radius:9px;background:var(--card2);font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:var(--mP)"></span>P {{ dayTot.p }} g</span>
+<span style="padding:5px 9px;border-radius:9px;background:var(--card2);font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:var(--mC)"></span>C {{ dayTot.c }} g</span>
+<span style="padding:5px 9px;border-radius:9px;background:var(--card2);font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:var(--mG)"></span>G {{ dayTot.g }} g</span>
+<span style="padding:5px 9px;border-radius:9px;background:var(--card2);font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:var(--mF)"></span>F {{ dayTot.f }} g</span>
+</div>
+</div>
+
+<sc-if value="{{ dayEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--card);border-radius:24px;padding:32px 24px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+<div style="width:84px;height:84px;border-radius:42px;background:repeating-linear-gradient(135deg,var(--ph1) 0 6px,var(--ph2) 6px 12px);border:1.5px dashed var(--line)"></div>
+<div style="font:700 20px 'Bricolage Grotesque', sans-serif">Nada registrado ainda</div>
+<div style="font:400 14px/1.5 Figtree;color:var(--ink2);max-width:260px">Quando você registrar uma refeição, ela aparece aqui com horário e totais.</div>
+<button onClick="{{ goRegistrar }}" style="margin-top:6px;height:48px;padding:0 20px;border-radius:16px;border:0;background:var(--pri);color:var(--onPri);font:700 15px Figtree">Registrar refeição</button>
+</div>
+</sc-if>
+
+<sc-for list="{{ entries }}" as="e" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:16px"><span style="font:600 12px Figtree;color:var(--ink2);font-variant-numeric:tabular-nums">{{ e.time }}</span><span style="flex:1;width:2px;border-radius:1px;background:var(--line)"></span></div>
+<div style="background:var(--card);border-radius:20px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;border:1.5px solid {{ e.border }}">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:52px;height:52px;flex:none;border-radius:14px;background:{{ e.thumbBg }};display:flex;align-items:center;justify-content:center;font:500 9px 'JetBrains Mono', monospace;color:var(--ink2)">{{ e.thumbLabel }}</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font:600 15px Figtree">{{ e.title }}</span><sc-if value="{{ e.fora }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 7px;border-radius:7px;background:var(--ambSoft);color:var(--amb);font:700 11px Figtree">Fora do plano</span></sc-if></div><span style="font:500 13px/1.35 Figtree;color:var(--ink2)">{{ e.desc }}</span></div>
+<div style="text-align:right;flex:none"><div style="font:700 18px 'Bricolage Grotesque', sans-serif;font-variant-numeric:tabular-nums">{{ e.kcal }}</div><div style="font:500 11px Figtree;color:var(--ink2)">kcal</div></div>
+</div>
+<sc-if value="{{ e.editing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:8px 8px 8px 14px"><span style="flex:1;font:600 14px Figtree">Porção</span><button onClick="{{ e.dec }}" aria-label="Menos" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card);color:var(--ink);font:600 20px Figtree">−</button><span style="min-width:48px;text-align:center;font:700 16px Figtree">{{ e.multText }}</span><button onClick="{{ e.inc }}" aria-label="Mais" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card);color:var(--ink);font:600 20px Figtree">+</button></div>
+</sc-if>
+<div style="display:flex;gap:8px">
+<button onClick="{{ e.onEdit }}" style="flex:1;height:40px;border-radius:12px;border:1.5px solid var(--line);background:none;color:var(--ink);font:600 13px Figtree">{{ e.editLabel }}</button>
+<button onClick="{{ e.onDelete }}" style="flex:1;height:40px;border-radius:12px;border:1.5px solid var(--line);background:none;color:var(--ink);font:600 13px Figtree">Excluir</button>
+</div>
+</div>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{ isWeekView }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font:700 16px Figtree">15 a 21 de outubro</span><span style="font:600 13px Figtree;color:var(--ink2)">média {{ weekAvg }} kcal</span></div>
+<sc-for list="{{ weekRows }}" as="w" hint-placeholder-count="7">
+<button onClick="{{ w.onClick }}" style="display:grid;grid-template-columns:64px minmax(0,1fr) 58px;gap:10px;align-items:center;height:48px;border:0;background:none;padding:0;color:var(--ink);text-align:left"><span style="font:600 14px Figtree">{{ w.label }}</span><span style="position:relative;height:10px;border-radius:5px;background:var(--track)"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ w.pct }};border-radius:5px;background:{{ w.color }}"></span><span style="position:absolute;left:{{ metaPct }};top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.35"></span></span><span style="font:700 14px Figtree;text-align:right;font-variant-numeric:tabular-nums">{{ w.kcal }}</span></button>
+</sc-for>
+<div style="font:500 12px Figtree;color:var(--ink2);margin-top:6px">Linha vertical = meta de {{ metaK }} kcal · toque em um dia para abrir</div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ toastDiario }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:16px;right:16px;bottom:104px;padding:8px 8px 8px 16px;border-radius:16px;background:var(--ink);color:var(--bg);font:600 14px Figtree;z-index:30;display:flex;align-items:center;gap:10px;animation:dcPop .3s ease both"><span style="flex:1">{{ toastDiario }}</span><button onClick="{{ undoDelete }}" style="height:40px;padding:0 14px;border-radius:12px;border:0;background:var(--bg);color:var(--ink);font:700 13px Figtree">Desfazer</button></div></sc-if>
+<dc-import name="TabBar" active="diario" on-nav="{{ navTo }}" hint-size="390px,90px" style="position:absolute;left:0;right:0;bottom:0;height:90px;z-index:25"></dc-import>
+</div></div></div>
+</sc-if>
+
+<sc-if value="{{ vis.progresso }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">05</span>Progresso</div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink);background:var(--bg)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:60px 20px 120px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px"><span style="font:700 30px 'Bricolage Grotesque', sans-serif">Progresso</span><button style="height:44px;padding:0 14px;border-radius:14px;border:0;background:var(--card);box-shadow:var(--shadow);color:var(--ink);font:600 14px Figtree">+ Pesagem</button></div>
+
+<div style="background:var(--card);border-radius:28px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 16px Figtree">Peso</span>
+<div style="display:flex;padding:3px;border-radius:12px;background:var(--card2)"><button onClick="{{ setP4 }}" style="height:34px;padding:0 12px;border-radius:9px;border:0;background:{{ per.aBg }};color:var(--ink);font:600 13px Figtree">4 sem</button><button onClick="{{ setP12 }}" style="height:34px;padding:0 12px;border-radius:9px;border:0;background:{{ per.bBg }};color:var(--ink);font:600 13px Figtree">12 sem</button></div></div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+<div><div style="font:600 12px Figtree;color:var(--ink2);letter-spacing:.04em;text-transform:uppercase">Tendência</div><div style="display:flex;align-items:baseline;gap:6px"><span style="font:800 48px/1 'Bricolage Grotesque', sans-serif;letter-spacing:-.02em">{{ chart.trend }}</span><span style="font:600 16px Figtree;color:var(--ink2)">kg</span></div></div>
+<div style="text-align:right"><div style="display:inline-block;padding:6px 10px;border-radius:10px;background:var(--priSoft);color:var(--priInk);font:700 14px Figtree">{{ chart.delta }}</div><div style="font:500 12px Figtree;color:var(--ink2);margin-top:6px">pesagem de hoje {{ chart.today }} kg</div></div>
+</div>
+<div style="position:relative;height:170px">
+<svg width="310" height="170" viewBox="0 -10 310 170" style="display:block;overflow:visible"><path d="{{ chart.grid }}" stroke="var(--line)" stroke-width="1" fill="none"></path><path d="{{ chart.area }}" fill="var(--priSoft)" opacity=".7"></path><path d="{{ chart.dots }}" fill="var(--ink2)" opacity=".35"></path><path d="{{ chart.path }}" stroke="var(--pri)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="{{ chart.lx }}" cy="{{ chart.ly }}" r="6" fill="var(--card)" stroke="var(--pri)" stroke-width="3"></circle></svg>
+<sc-for list="{{ chart.labels }}" as="gl" hint-placeholder-count="4"><span style="position:absolute;right:-4px;top:{{ gl.y }};transform:translateY(-50%);font:500 11px Figtree;color:var(--ink2);background:var(--card);padding-left:4px">{{ gl.label }}</span></sc-for>
+</div>
+<div style="display:flex;gap:16px;font:500 12px Figtree;color:var(--ink2)"><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3.5px;border-radius:2px;background:var(--pri)"></span>Média móvel 7 dias</span><span style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:3px;background:var(--ink2);opacity:.5"></span>Pesagem diária</span></div>
+<div style="font:500 13px/1.45 Figtree;color:var(--ink2);border-top:1px solid var(--line);padding-top:12px">O peso do dia varia com água e sal. Olhe para a linha: ela mostra a direção real.</div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><span style="font:700 18px Figtree">Medidas</span><span style="font:500 13px Figtree;color:var(--ink2)">desde 15 jul</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<sc-for list="{{ measures }}" as="me" hint-placeholder-count="6">
+<div style="background:var(--card);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px"><span style="font:600 13px Figtree;color:var(--ink2)">{{ me.label }}</span><span style="font:700 24px 'Bricolage Grotesque', sans-serif">{{ me.val }}<span style="font:600 13px Figtree;color:var(--ink2)"> {{ me.unit }}</span></span><span style="font:700 13px Figtree;color:var(--pri)">{{ me.delta }}</span></div>
+</sc-for>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><span style="font:700 18px Figtree">Fotos de progresso</span><span style="font:600 13px Figtree;color:var(--pri)">Comparar</span></div>
+<div style="background:var(--card);border-radius:24px;padding:12px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:200px;border-radius:16px;background:repeating-linear-gradient(135deg,var(--ph1) 0 8px,var(--ph2) 8px 16px);display:flex;align-items:flex-end;justify-content:center;padding:10px;font:500 10px 'JetBrains Mono', monospace;color:var(--ink2)">foto · antes</div><span style="font:600 13px Figtree;text-align:center">15 jul · 92,4 kg</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:200px;border-radius:16px;background:repeating-linear-gradient(135deg,var(--ph1) 0 8px,var(--ph2) 8px 16px);display:flex;align-items:flex-end;justify-content:center;padding:10px;font:500 10px 'JetBrains Mono', monospace;color:var(--ink2)">foto · agora</div><span style="font:600 13px Figtree;text-align:center">20 out · {{ chart.trend }} kg</span></div>
+</div>
+
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 16px Figtree">Calorias vs meta</span><span style="font:500 12px Figtree;color:var(--ink2)">últimos 7 dias</span></div>
+<div style="position:relative;height:130px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;align-items:end">
+<div style="position:absolute;left:0;right:0;bottom:{{ metaLine }};border-top:2px dashed var(--ink2);opacity:.4"></div>
+<sc-for list="{{ kbars }}" as="kb" hint-placeholder-count="7"><div style="height:{{ kb.h }};border-radius:8px 8px 4px 4px;background:{{ kb.color }};transition:height .8s"></div></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;text-align:center;font:600 12px Figtree;color:var(--ink2);margin-top:-4px"><span>Q</span><span>S</span><span>S</span><span>D</span><span>S</span><span>T</span><span>Q</span></div>
+<div style="display:flex;gap:14px;font:500 12px Figtree;color:var(--ink2)"><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:3px;background:var(--pri)"></span>na meta</span><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:3px;background:var(--ambLine)"></span>acima</span><span style="display:flex;gap:6px;align-items:center"><span style="width:14px;border-top:2px dashed var(--ink2)"></span>{{ metaK }}</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:var(--card);border-radius:24px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:8px">
+<span style="font:700 14px Figtree;align-self:flex-start">Aderência ao plano</span>
+<div style="position:relative;width:96px;height:96px"><svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg)"><circle cx="48" cy="48" r="38" fill="none" stroke="var(--track)" stroke-width="10"></circle><circle cx="48" cy="48" r="38" fill="none" stroke="var(--pri)" stroke-width="10" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="42.98"></circle></svg><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 24px 'Bricolage Grotesque', sans-serif">82%</span></div>
+<span style="font:500 12px Figtree;color:var(--ink2);text-align:center">+6 pts vs semana passada</span>
+</div>
+<div style="background:var(--card);border-radius:24px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px">
+<span style="font:700 14px Figtree">Consistência</span>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">
+<sc-for list="{{ consist }}" as="cd" hint-placeholder-count="28"><span style="aspect-ratio:1;border-radius:5px;background:{{ cd.bg }};border:1.5px solid {{ cd.border }}"></span></sc-for>
+</div>
+<span style="font:500 12px Figtree;color:var(--ink2)">25 de 28 dias registrados</span>
+</div>
+</div>
+</div>
+<dc-import name="TabBar" active="progresso" on-nav="{{ navTo }}" hint-size="390px,90px" style="position:absolute;left:0;right:0;bottom:0;height:90px;z-index:25"></dc-import>
+</div></div></div>
+</sc-if>
+
+<sc-if value="{{ vis.agente }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">06</span>Agente<span style="font-weight:500;color:#55676A">· chat + resumo semanal</span></div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+<div style="position:absolute;top:0;left:0;right:0;padding:56px 20px 12px;background:var(--bar);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);z-index:20;display:flex;align-items:center;gap:12px">
+<div style="width:42px;height:42px;border-radius:15px;background:var(--pri);display:flex;align-items:center;justify-content:center"><div style="width:16px;height:16px;border-radius:8px;border:3px solid var(--onPri)"></div></div>
+<div style="flex:1"><div style="font:700 17px Figtree">Agente Leve</div><div style="font:500 12.5px Figtree;color:var(--ink2)">Analisa seus registros · não altera suas metas</div></div>
+</div>
+<div ref="{{ chatRef }}" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:128px 16px 236px;display:flex;flex-direction:column;gap:12px">
+<div style="align-self:flex-start;max-width:86%;padding:12px 14px;border-radius:20px 20px 20px 6px;background:var(--card);box-shadow:var(--shadow);font:500 15px/1.45 Figtree">Bom dia, Rafael. Fechei o resumo da sua semana.</div>
+
+<div style="background:var(--card);border-radius:24px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 17px 'Bricolage Grotesque', sans-serif">Resumo semanal</span><span style="font:500 12px Figtree;color:var(--ink2)">14–20 out</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="background:var(--card2);border-radius:14px;padding:10px 12px"><div style="font:600 11.5px Figtree;color:var(--ink2)">Tendência de peso</div><div style="font:700 19px Figtree">−0,4 kg/sem</div></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px 12px"><div style="font:600 11.5px Figtree;color:var(--ink2)">Aderência</div><div style="font:700 19px Figtree">82%</div></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px 12px"><div style="font:600 11.5px Figtree;color:var(--ink2)">Refeições registradas</div><div style="font:700 19px Figtree">31 de 35</div></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px 12px"><div style="font:600 11.5px Figtree;color:var(--ink2)">Proteína média</div><div style="font:700 19px Figtree">118 g</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;font:500 14px/1.45 Figtree">
+<div style="display:flex;gap:10px"><span style="width:8px;height:8px;border-radius:4px;background:var(--pri);margin-top:7px;flex:none"></span><span><strong>Padrão:</strong> café da manhã registrado 7 de 7 dias, sempre dentro do plano.</span></div>
+<div style="display:flex;gap:10px"><span style="width:8px;height:8px;border-radius:4px;background:var(--ambLine);margin-top:7px;flex:none"></span><span><strong>Ponto de melhora:</strong> o lanche da tarde ficou fora do plano 3 vezes, sempre depois das 17h.</span></div>
+</div>
+</div>
+
+<div style="background:var(--card);border-radius:24px;padding:18px;box-shadow:var(--shadow);border:1.5px solid var(--pri);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:8px"><span style="padding:4px 9px;border-radius:8px;background:var(--priSoft);color:var(--priInk);font:700 12px Figtree">Proposta</span><span style="font:700 15px Figtree">Para levar ao nutrólogo</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;font:500 14px/1.45 Figtree">
+<div style="display:flex;gap:10px"><span style="font:700 14px Figtree;color:var(--pri)">1</span><span>Antecipar o lanche da tarde para 16h e incluir 15 g de proteína — reduz a fome que aparece às 17h.</span></div>
+<div style="display:flex;gap:10px"><span style="font:700 14px Figtree;color:var(--pri)">2</span><span>Avaliar troca do pão de queijo da manhã por uma opção do plano com o mesmo horário.</span></div>
+</div>
+<div style="font:500 12.5px/1.45 Figtree;color:var(--ink2)">Suas metas continuam as mesmas até o nutrólogo validar. Próxima consulta: 12 nov.</div>
+<div style="display:flex;gap:8px">
+<button onClick="{{ exportPdf }}" style="flex:1;height:46px;border-radius:14px;border:0;background:var(--pri);color:var(--onPri);font:700 14px Figtree">Exportar PDF</button>
+<button onClick="{{ sharePdf }}" style="flex:1;height:46px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font:600 14px Figtree">Compartilhar</button>
+</div>
+</div>
+
+<sc-for list="{{ msgs }}" as="m" hint-placeholder-count="2">
+<div style="align-self:{{ m.align }};max-width:86%;padding:12px 14px;border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};box-shadow:var(--shadow);font:500 15px/1.45 Figtree;animation:dcPop .3s ease both">{{ m.text }}</div>
+</sc-for>
+<sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">{{ typingEl }}</sc-if>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:90px;padding:10px 0 12px;background:var(--bg);z-index:20;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:8px;overflow-x:auto;padding:0 16px">
+<sc-for list="{{ chips }}" as="ch" hint-placeholder-count="4">
+<button onClick="{{ ch.onClick }}" style="flex:none;height:40px;padding:0 14px;border-radius:20px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 13.5px Figtree">{{ ch.label }}</button>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px;padding:0 16px">
+<input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKey }}" placeholder="Pergunte sobre seu plano…" style="flex:1;min-width:0;height:48px;border-radius:24px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:0 18px;font:500 15px Figtree;outline:none">
+<button onClick="{{ sendInput }}" aria-label="Enviar" style="width:48px;height:48px;border-radius:24px;border:0;background:var(--pri);color:var(--onPri);font:700 18px Figtree">↑</button>
+</div>
+</div>
+<sc-if value="{{ toastAgente }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:16px;right:16px;top:124px;padding:14px 16px;border-radius:16px;background:var(--ink);color:var(--bg);font:600 14px Figtree;z-index:30;animation:dcPop .3s ease both">{{ toastAgente }}</div></sc-if>
+<dc-import name="TabBar" active="agente" on-nav="{{ navTo }}" hint-size="390px,90px" style="position:absolute;left:0;right:0;bottom:0;height:90px;z-index:25"></dc-import>
+</div></div></div>
+</sc-if>
+
+
+<sc-if value="{{ vis.plano }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;font:600 14px Figtree;color:#0F1D1E"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">07</span>Meu plano<span style="font-weight:500;color:#55676A">· com dieta ou sem dieta</span></div>
+<div style="width:410px;height:864px;border-radius:64px;background:#0A0E0F;padding:10px;box-shadow:0 40px 80px -30px rgba(10,20,20,.4)">
+<div style="position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--ink)">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 40px;z-index:30;font:600 16px Figtree;color:var(--ink);background:var(--bg)"><span>9:41</span><div style="display:flex;gap:6px;align-items:center"><div style="width:17px;height:11px;border-radius:2px;background:var(--ink)"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid var(--ink);padding:1.5px;display:flex"><div style="width:72%;background:var(--ink);border-radius:1.5px"></div></div></div></div>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:60px 20px 120px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;padding-top:6px"><button onClick="{{ goHoje }}" aria-label="Voltar" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card);box-shadow:var(--shadow);color:var(--ink);font:600 22px Figtree">‹</button><span style="font:700 30px 'Bricolage Grotesque', sans-serif">Meu plano</span></div>
+<div style="font:500 14px/1.45 Figtree;color:var(--ink2);margin-top:-4px">De onde vêm suas metas diárias?</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<button onClick="{{ setNutro }}" style="min-height:96px;border-radius:20px;border:2px solid {{ pmSel.nBorder }};background:{{ pmSel.nBg }};color:var(--ink);padding:14px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;gap:8px"><span style="width:22px;height:22px;border-radius:11px;border:2px solid {{ pmSel.nBorder }};display:flex;align-items:center;justify-content:center"><span style="width:10px;height:10px;border-radius:5px;background:{{ pmSel.nDot }}"></span></span><span style="display:flex;flex-direction:column;gap:2px"><span style="font:700 15px Figtree">Tenho dieta</span><span style="font:500 12.5px Figtree;color:var(--ink2)">prescrita pelo nutrólogo</span></span></button>
+<button onClick="{{ setAuto }}" style="min-height:96px;border-radius:20px;border:2px solid {{ pmSel.aBorder }};background:{{ pmSel.aBg }};color:var(--ink);padding:14px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;gap:8px"><span style="width:22px;height:22px;border-radius:11px;border:2px solid {{ pmSel.aBorder }};display:flex;align-items:center;justify-content:center"><span style="width:10px;height:10px;border-radius:5px;background:{{ pmSel.aDot }}"></span></span><span style="display:flex;flex-direction:column;gap:2px"><span style="font:700 15px Figtree">Não tenho dieta</span><span style="font:500 12.5px Figtree;color:var(--ink2)">o Leve calcula para mim</span></span></button>
+</div>
+
+<sc-if value="{{ isNutro }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;align-items:center"><div style="width:48px;height:58px;flex:none;border-radius:10px;background:repeating-linear-gradient(135deg,var(--ph1) 0 5px,var(--ph2) 5px 10px);border:1px solid var(--line);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font:500 8px 'JetBrains Mono', monospace;color:var(--ink2)">PDF</div><div style="flex:1;min-width:0"><div style="font:700 15px Figtree">Dieta · Dra. Marina Alves</div><div style="font:500 13px Figtree;color:var(--ink2)">Prescrita em 15 jul · revisão em 12 nov</div></div></div>
+<sc-if value="{{ importing }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--card2)"><span style="font:600 13px Figtree">Lendo sua dieta…</span><span style="height:10px;width:80%;border-radius:5px;background:var(--line)"></span><span style="height:10px;width:60%;border-radius:5px;background:var(--line)"></span></div></sc-if>
+<div style="display:flex;gap:8px"><button onClick="{{ importDiet }}" style="flex:1;height:46px;border-radius:14px;border:0;background:var(--pri);color:var(--onPri);font:700 14px Figtree">Importar foto ou PDF</button><button onClick="{{ editManual }}" style="flex:1;height:46px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font:600 14px Figtree">Digitar à mão</button></div>
+<span style="font:500 12px/1.45 Figtree;color:var(--ink2)">A IA lê refeições, porções e substituições. Você revisa tudo antes de salvar.</span>
+</div>
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 16px Figtree">Metas diárias</span><span style="font:500 12px Figtree;color:var(--ink2)">definidas pelo nutrólogo</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<sc-for list="{{ goalFields }}" as="gf" hint-placeholder-count="5">
+<label style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:14px;background:var(--card2)"><span style="display:flex;align-items:center;gap:6px;font:600 12px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:{{ gf.color }}"></span>{{ gf.label }}</span><span style="display:flex;align-items:baseline;gap:4px"><input type="number" value="{{ gf.value }}" onChange="{{ gf.onChange }}" style="width:100%;min-width:0;border:0;background:none;outline:none;color:var(--ink);font:700 20px Figtree;padding:0"><span style="font:600 13px Figtree;color:var(--ink2)">{{ gf.unit }}</span></span></label>
+</sc-for>
+</div>
+<span style="font:500 12px/1.45 Figtree;color:var(--ink2)">O agente nunca muda essas metas. Sugestões viram uma proposta para você levar à consulta.</span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><span style="font:700 18px Figtree">Refeições da dieta</span><span style="font:500 13px Figtree;color:var(--ink2)">{{ dietCount }}</span></div>
+<sc-for list="{{ dietMeals }}" as="dm" hint-placeholder-count="5">
+<div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+<button onClick="{{ dm.onToggle }}" style="width:100%;min-height:60px;border:0;background:none;color:var(--ink);display:flex;align-items:center;gap:12px;padding:12px 16px;text-align:left"><span style="width:44px;flex:none;font:600 13px Figtree;color:var(--ink2)">{{ dm.time }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:600 15px Figtree">{{ dm.name }}</span><span style="font:500 13px Figtree;color:var(--ink2)">~{{ dm.kcal }} kcal · {{ dm.subsCount }}</span></span><span style="font:600 20px Figtree;color:var(--ink2);transform:rotate({{ dm.rot }});transition:transform .2s">›</span></button>
+<sc-if value="{{ dm.open }}" hint-placeholder-val="{{ false }}">
+<div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px">
+<sc-for list="{{ dm.items }}" as="di" hint-placeholder-count="3"><span style="display:flex;gap:10px;font:500 14px/1.4 Figtree"><span style="width:6px;height:6px;border-radius:3px;background:var(--pri);margin-top:7px;flex:none"></span>{{ di.t }}</span></sc-for>
+</div>
+<span style="font:600 12px Figtree;color:var(--ink2)">Substituições permitidas</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ dm.subs }}" as="sb" hint-placeholder-count="2"><span style="padding:6px 10px;border-radius:10px;background:var(--priSoft);color:var(--priInk);font:600 12.5px Figtree">{{ sb.t }}</span></sc-for></div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<button onClick="{{ editManual }}" style="height:52px;border-radius:16px;border:1.5px dashed var(--line);background:none;color:var(--ink);font:600 14px Figtree">+ Adicionar refeição</button>
+</sc-if>
+
+<sc-if value="{{ isAuto }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px;border-radius:18px;background:var(--priSoft);font:500 14px/1.5 Figtree;color:var(--ink)">Sem dieta prescrita, o Leve calcula suas metas com seus dados e o ritmo que você escolher — e sugere o que comer em cada refeição. É uma estimativa: vale validar com um profissional quando puder.</div>
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<span style="font:700 16px Figtree">Seus dados</span>
+<div style="display:flex;padding:4px;border-radius:14px;background:var(--card2)"><button onClick="{{ setM }}" style="flex:1;height:40px;border-radius:10px;border:0;background:{{ sexo.mBg }};color:var(--ink);font:600 14px Figtree;box-shadow:{{ sexo.mSh }}">Masculino</button><button onClick="{{ setF }}" style="flex:1;height:40px;border-radius:10px;border:0;background:{{ sexo.fBg }};color:var(--ink);font:600 14px Figtree;box-shadow:{{ sexo.fSh }}">Feminino</button></div>
+<sc-for list="{{ bodyFields }}" as="bf" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font:600 15px Figtree">{{ bf.label }}</span><button onClick="{{ bf.dec }}" aria-label="Diminuir" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card2);color:var(--ink);font:600 20px Figtree">−</button><span style="min-width:78px;text-align:center;font:700 17px Figtree;font-variant-numeric:tabular-nums">{{ bf.val }}</span><button onClick="{{ bf.inc }}" aria-label="Aumentar" style="width:44px;height:44px;border-radius:22px;border:0;background:var(--card2);color:var(--ink);font:600 20px Figtree">+</button></div>
+</sc-for>
+<span style="font:600 13px Figtree;color:var(--ink2);margin-top:4px">Nível de atividade</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ activity }}" as="ac" hint-placeholder-count="4"><button onClick="{{ ac.onClick }}" style="height:40px;padding:0 14px;border-radius:20px;border:1.5px solid {{ ac.border }};background:{{ ac.bg }};color:{{ ac.fg }};font:600 13.5px Figtree">{{ ac.label }}</button></sc-for></div>
+<span style="font:600 13px Figtree;color:var(--ink2);margin-top:4px">Ritmo de perda</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ ritmos }}" as="rt" hint-placeholder-count="3"><button onClick="{{ rt.onClick }}" style="height:40px;padding:0 14px;border-radius:20px;border:1.5px solid {{ rt.border }};background:{{ rt.bg }};color:{{ rt.fg }};font:600 13.5px Figtree">{{ rt.label }}</button></sc-for></div>
+</div>
+<div style="background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px">
+<span style="font:600 13px Figtree;color:var(--ink2)">Sua meta diária calculada</span>
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font:800 46px/1 'Bricolage Grotesque', sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ ag.kcal }}</span><span style="font:600 15px Figtree;color:var(--ink2)">kcal</span></div>
+<span style="font:500 13px/1.45 Figtree;color:var(--ink2)">Gasto estimado {{ ag.tdee }} kcal − déficit {{ ag.def }} kcal</span>
+<sc-if value="{{ ag.floored }}" hint-placeholder-val="{{ false }}"><span style="padding:10px 12px;border-radius:12px;background:var(--ambSoft);color:var(--amb);font:500 13px/1.4 Figtree">Ajustamos para o mínimo seguro. Para perder mais rápido, converse com um profissional.</span></sc-if>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mP)"></span>Proteína</span><span style="font:700 16px Figtree">{{ ag.p }} g</span></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mC)"></span>Carbo</span><span style="font:700 16px Figtree">{{ ag.c }} g</span></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mG)"></span>Gordura</span><span style="font:700 16px Figtree">{{ ag.g }} g</span></div>
+<div style="background:var(--card2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:5px;font:600 11px Figtree;color:var(--ink2)"><span style="width:7px;height:7px;border-radius:4px;background:var(--mF)"></span>Fibra</span><span style="font:700 16px Figtree">{{ ag.f }} g</span></div>
+</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><span style="font:700 18px Figtree">O que comer hoje</span><span style="font:500 13px Figtree;color:var(--ink2)">recalcula com seus dados</span></div>
+<sc-for list="{{ autoMeals }}" as="am" hint-placeholder-count="5">
+<div style="background:var(--card);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow);display:flex;gap:12px"><span style="width:44px;flex:none;font:600 13px Figtree;color:var(--ink2);padding-top:2px">{{ am.time }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="display:flex;justify-content:space-between;gap:8px"><span style="font:600 15px Figtree">{{ am.name }}</span><span style="font:700 14px Figtree;white-space:nowrap">~{{ am.kcal }} kcal</span></span><span style="font:500 13.5px/1.45 Figtree;color:var(--ink2)">{{ am.sug }}</span></span></div>
+</sc-for>
+<button onClick="{{ goAgente }}" style="height:52px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 14px Figtree">Pedir outras opções ao agente</button>
+<button onClick="{{ setNutro }}" style="height:44px;border:0;background:none;color:var(--pri);font:600 14px Figtree">Recebi uma dieta · cadastrar agora</button>
+</sc-if>
+</div>
+<sc-if value="{{ toastPlano }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:16px;right:16px;bottom:104px;padding:14px 16px;border-radius:16px;background:var(--ink);color:var(--bg);font:600 14px Figtree;z-index:30;animation:dcPop .3s ease both">{{ toastPlano }}</div></sc-if>
+<dc-import name="TabBar" active="plano" on-nav="{{ navTo }}" hint-size="390px,90px" style="position:absolute;left:0;right:0;bottom:0;height:90px;z-index:25"></dc-import>
+</div></div></div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{ vis.board }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:64px;max-width:1340px;background:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;gap:36px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+<div style="display:flex;align-items:baseline;gap:12px"><span style="font:500 11px 'JetBrains Mono', monospace;background:#0F1D1E;color:#fff;padding:4px 8px;border-radius:6px">DS</span><span style="font:800 28px 'Bricolage Grotesque', sans-serif">Design system</span><span style="font:500 14px Figtree;color:#55676A">cores, tipografia e componentes</span></div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#0F6670"></div><span style="font:700 13px Figtree">Petróleo · primária</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#0F6670</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#12806A"></div><span style="font:700 13px Figtree">Menta · alternativa</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#12806A</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#DDEEEF"></div><span style="font:700 13px Figtree">Primária suave</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#DDEEEF</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#FFF1D6;border:2px solid #F0C77A"></div><span style="font:700 13px Figtree">Âmbar · atenção</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#8F5400 / #FFF1D6</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#0F1D1E"></div><span style="font:700 13px Figtree">Tinta</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#0F1D1E · #55676A</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#F4F6F5;border:1px solid #E1E7E6"></div><span style="font:700 13px Figtree">Fundo claro</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#F4F6F5 · #FFF</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;background:#0C1213;display:flex;align-items:flex-end;padding:10px;gap:6px"><span style="width:22px;height:22px;border-radius:7px;background:#151D1E"></span><span style="width:22px;height:22px;border-radius:7px;background:#5BC0C8"></span><span style="width:22px;height:22px;border-radius:7px;background:#F2B451"></span></div><span style="font:700 13px Figtree">Tema escuro</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">#0C1213 · #5BC0C8</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:72px;border-radius:16px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden"><span style="background:oklch(0.6 0.13 255)"></span><span style="background:oklch(0.7 0.12 75)"></span><span style="background:oklch(0.6 0.13 330)"></span><span style="background:oklch(0.62 0.12 150)"></span></div><span style="font:700 13px Figtree">Macros P · C · G · F</span><span style="font:500 11px 'JetBrains Mono', monospace;color:#55676A">oklch L .6–.7 C .12</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px">
+<div style="display:flex;flex-direction:column;gap:14px">
+<span style="font:600 12px 'JetBrains Mono', monospace;color:#55676A">TIPOGRAFIA · Bricolage Grotesque + Figtree</span>
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font:800 56px/1 'Bricolage Grotesque', sans-serif;letter-spacing:-.03em">1.230</span><span style="font:500 12px 'JetBrains Mono', monospace;color:#55676A">Número principal · 54/800</span></div>
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font:700 30px 'Bricolage Grotesque', sans-serif">Olá, Rafael</span><span style="font:500 12px 'JetBrains Mono', monospace;color:#55676A">Título de tela · 30/700</span></div>
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font:700 17px Figtree">Refeições do plano</span><span style="font:500 12px 'JetBrains Mono', monospace;color:#55676A">Seção · 17/700</span></div>
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font:500 15px Figtree">Arroz, feijão, frango e salada</span><span style="font:500 12px 'JetBrains Mono', monospace;color:#55676A">Corpo · 15/500</span></div>
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font:500 13px Figtree;color:#55676A">P 42 · C 49 · G 6 g</span><span style="font:500 12px 'JetBrains Mono', monospace;color:#55676A">Apoio · 13/500</span></div>
+<span style="font:500 13px/1.5 Figtree;color:#55676A">Tamanhos em rem no build para respeitar o Dynamic Type do iOS. Contraste mínimo 4.5:1 em todo texto; alvos de toque ≥ 44 px.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<span style="font:600 12px 'JetBrains Mono', monospace;color:#55676A">COMPONENTES</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button style="height:52px;padding:0 20px;border-radius:16px;border:0;background:#0F6670;color:#fff;font:700 15px Figtree">Primário</button><button style="height:52px;padding:0 20px;border-radius:16px;border:1.5px solid #E1E7E6;background:#fff;color:#0F1D1E;font:600 15px Figtree">Secundário</button><button style="height:52px;padding:0 16px;border-radius:16px;border:0;background:none;color:#0F1D1E;font:600 15px Figtree">Texto</button></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="padding:5px 10px;border-radius:10px;background:#DDEEEF;color:#0B4F57;font:700 12px Figtree">Feita</span><span style="padding:5px 10px;border-radius:10px;background:#EEF2F1;color:#55676A;font:700 12px Figtree">Pendente</span><span style="padding:5px 10px;border-radius:10px;background:#FFF1D6;color:#8F5400;font:700 12px Figtree">Fora do plano</span><span style="padding:5px 10px;border-radius:10px;background:#DDEEEF;color:#0B4F57;font:700 12px Figtree">Confiança alta 94%</span><span style="padding:5px 10px;border-radius:10px;background:#FFF1D6;color:#8F5400;font:700 12px Figtree">Confiança média 68%</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="padding:5px 9px;border-radius:9px;background:#EEF2F1;font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:oklch(0.6 0.13 255)"></span>P 42 g</span><span style="padding:5px 9px;border-radius:9px;background:#EEF2F1;font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:oklch(0.7 0.12 75)"></span>C 49 g</span><span style="padding:5px 9px;border-radius:9px;background:#EEF2F1;font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:oklch(0.6 0.13 330)"></span>G 6 g</span><span style="padding:5px 9px;border-radius:9px;background:#EEF2F1;font:600 12px Figtree;display:flex;gap:5px;align-items:center"><span style="width:7px;height:7px;border-radius:4px;background:oklch(0.62 0.12 150)"></span>F 10 g</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="padding:14px;border-radius:16px;background:#F4F6F5;display:flex;flex-direction:column;gap:6px"><span style="font:700 13px Figtree">Erro claro</span><span style="font:500 13px/1.45 Figtree;color:#3D4E50">Não consegui analisar a foto — a imagem ficou escura. Tente com mais luz ou registre por texto.</span><button style="align-self:flex-start;height:40px;padding:0 14px;border-radius:12px;border:0;background:#0F6670;color:#fff;font:700 13px Figtree">Tentar de novo</button></div>
+<div style="padding:14px;border-radius:16px;background:#F4F6F5;display:flex;flex-direction:column;gap:8px"><span style="font:700 13px Figtree">Skeleton de análise</span><span style="height:14px;width:70%;border-radius:7px;background:#E1E7E6"></span><span style="height:44px;border-radius:12px;background:#E1E7E6"></span><span style="height:44px;border-radius:12px;background:#E1E7E6"></span></div>
+</div>
+<span style="font:500 13px/1.5 Figtree;color:#55676A">Slider de porção, anel de progresso, card de refeição e estado vazio estão vivos nas telas <a href="#03">03</a>, <a href="#01">01</a> e <a href="#04">04</a>.</span>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;modo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Canvas&quot;,&quot;Protótipo&quot;],&quot;default&quot;:&quot;Canvas&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Exibição&quot;},&quot;tema&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Claro&quot;,&quot;Escuro&quot;],&quot;default&quot;:&quot;Claro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Exibição&quot;},&quot;corPrincipal&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Azul-petróleo&quot;,&quot;Verde-menta&quot;],&quot;default&quot;:&quot;Azul-petróleo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Exibição&quot;}}">
+const META = { kcal: 1800, p: 130, c: 180, g: 55, f: 30 };
+const PLAN_LUNCH = { kcal: 550, p: 40, c: 60 };
+const fmt = n => Math.round(n).toLocaleString('pt-BR');
+const dec = (n, d = 1) => n.toFixed(d).replace('.', ',');
+const F = {
+  arroz: { name: 'Arroz branco cozido', short: 'Arroz', kcal: 1.28, p: .025, c: .281, g: .002, f: .016 },
+  integral: { name: 'Arroz integral cozido', short: 'Arroz integral', kcal: 1.24, p: .026, c: .258, g: .01, f: .027 },
+  parbo: { name: 'Arroz parboilizado', short: 'Arroz parb.', kcal: 1.23, p: .025, c: .27, g: .003, f: .01 },
+  feijao: { name: 'Feijão carioca cozido', short: 'Feijão', kcal: .76, p: .048, c: .136, g: .005, f: .085 },
+  feijaoPreto: { name: 'Feijão preto cozido', short: 'Feijão preto', kcal: .77, p: .045, c: .14, g: .005, f: .084 },
+  lentilha: { name: 'Lentilha cozida', short: 'Lentilha', kcal: .93, p: .063, c: .163, g: .005, f: .079 },
+  frango: { name: 'Peito de frango grelhado', short: 'Frango', kcal: 1.59, p: .32, c: 0, g: .025, f: 0 },
+  frangoFrito: { name: 'Frango frito', short: 'Frango frito', kcal: 2.46, p: .24, c: .08, g: .13, f: .003 },
+  patinho: { name: 'Patinho grelhado', short: 'Patinho', kcal: 2.19, p: .359, c: 0, g: .073, f: 0 },
+  salada: { name: 'Alface e tomate', short: 'Salada', kcal: .15, p: .01, c: .03, g: .002, f: .018 },
+  brocolis: { name: 'Brócolis cozido', short: 'Brócolis', kcal: .25, p: .021, c: .044, g: .005, f: .034 },
+  azeite: { name: 'Azeite de oliva', short: 'Azeite', kcal: 8.84, p: 0, c: 0, g: 1, f: 0 }
+};
+const DOTS = ['var(--mC)', 'var(--mF)', 'var(--mP)', 'var(--pri)', 'var(--mG)'];
+const TAGPOS = [{ l: '8%', t: '40%' }, { l: '56%', t: '36%' }, { l: '50%', t: '63%' }, { l: '10%', t: '67%' }, { l: '34%', t: '51%' }];
+const initItems = () => [
+  { key: 'arroz', g: 120, conf: 94, alts: ['integral', 'parbo'], by: null },
+  { key: 'feijao', g: 100, conf: 88, alts: ['feijaoPreto', 'lentilha'], by: null },
+  { key: 'frango', g: 130, conf: 68, alts: ['frangoFrito', 'patinho'], by: null },
+  { key: 'salada', g: 60, conf: 83, alts: ['brocolis'], by: null }
+];
+const initQs = () => [
+  { id: 'preparo', q: 'O frango era grelhado ou frito?', short: 'Frango:', opts: ['Grelhado', 'Frito'], ans: null },
+  { id: 'azeite', q: 'Tinha azeite na salada?', short: 'Azeite:', opts: ['Sim, ~1 colher', 'Não tinha'], ans: null }
+];
+const PLAN = [
+  { id: 'cafe', name: 'Café da manhã', time: '07:30', kcal: 350 },
+  { id: 'lanche1', name: 'Lanche da manhã', time: '10:00', kcal: 180 },
+  { id: 'almoco', name: 'Almoço', time: '12:30', kcal: 550 },
+  { id: 'lanche2', name: 'Lanche da tarde', time: '16:00', kcal: 200 },
+  { id: 'jantar', name: 'Jantar', time: '19:30', kcal: 450 }
+];
+const DAYS = [
+  { d: 'Qui', long: 'Quinta', n: 15, kcal: 1760 }, { d: 'Sex', long: 'Sexta', n: 16, kcal: 1690 },
+  { d: 'Sáb', long: 'Sábado', n: 17, kcal: 2150 }, { d: 'Dom', long: 'Domingo', n: 18, kcal: 1980 },
+  { d: 'Seg', long: 'Segunda', n: 19, kcal: 1720 }, { d: 'Ter', long: 'Terça', n: 20, kcal: 1810 },
+  { d: 'Qua', long: 'Quarta', n: 21 }, { d: 'Qui', long: 'Quinta', n: 22 }
+];
+let UID = 100;
+const E = (time, meal, title, desc, kcal, p, c, g, f, fora, photo) => ({ id: ++UID, time, meal, title, desc, kcal, p, c, g, f, fora, photo, mult: 1 });
+const pastDay = kcal => {
+  const a = [E('07:15', 'cafe', 'Café da manhã', 'Tapioca com queijo branco e café', 340, 20, 42, 9, 2, false, true),
+    E('10:00', 'lanche1', 'Lanche da manhã', 'Maçã e 3 castanhas', 170, 3, 22, 8, 4, false, false),
+    E('12:50', 'almoco', 'Almoço', 'Arroz, feijão, patinho e legumes', 590, 42, 62, 16, 10, false, true),
+    E('16:20', 'lanche2', 'Lanche da tarde', 'Iogurte natural com aveia', 210, 11, 28, 5, 4, false, false)];
+  const r = kcal - 1310;
+  a.push(kcal > 2000 ? E('20:30', 'extra', 'Pizza', '2 fatias de mussarela', r, r * .045, r * .1, r * .038, 2, true, true)
+    : E('19:40', 'jantar', 'Jantar', 'Omelete de 2 ovos, salada e legumes', r, r * .07, r * .06, r * .05, 5, false, true));
+  return a;
+};
+const initDiaries = () => {
+  const d = {};
+  for (let i = 0; i < 6; i++) d[i] = pastDay(DAYS[i].kcal);
+  d[6] = [E('07:20', 'cafe', 'Café da manhã', '2 ovos mexidos, pão integral e café sem açúcar', 320, 19, 22, 16, 3, false, true),
+    E('10:05', 'lanche1', 'Lanche da manhã', 'Iogurte natural e 1 banana', 180, 8, 30, 3, 2, false, false),
+    E('11:10', 'extra', 'Pão de queijo', '2 unidades pequenas', 170, 4, 22, 8, 0, true, true)];
+  d[7] = [];
+  return d;
+};
+const WEIGHT = (() => { let s = 11; const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; const a = []; for (let i = 0; i < 84; i++) a.push(92.4 - 5.1 * (i / 83) + Math.sin(i / 4.3) * .3 + (r() - .5) * 1.2); return a; })();
+const MA = WEIGHT.map((v, i) => { const s = WEIGHT.slice(Math.max(0, i - 6), i + 1); return s.reduce((a, b) => a + b, 0) / s.length; });
+const SEARCH = [
+  { n: 'Arroz branco cozido', p: '100 g', k: 128, s: 'TACO' }, { n: 'Batata inglesa cozida', p: '100 g', k: 52, s: 'TACO' },
+  { n: 'Feijão carioca cozido', p: '100 g', k: 76, s: 'TACO' }, { n: 'Peito de frango grelhado', p: '100 g', k: 159, s: 'TACO' },
+  { n: 'Banana prata', p: '1 un · 70 g', k: 69, s: 'TACO' }, { n: 'Ovo de galinha cozido', p: '1 un · 50 g', k: 73, s: 'TACO' },
+  { n: 'Aveia em flocos', p: '30 g', k: 118, s: 'TACO' }, { n: 'Batata-doce cozida', p: '100 g', k: 77, s: 'TACO' },
+  { n: 'Iogurte natural integral', p: 'pote 170 g', k: 112, s: 'OFF' }, { n: 'Pão de forma integral', p: '2 fatias · 50 g', k: 124, s: 'OFF' },
+  { n: 'Whey protein sabor baunilha', p: '30 g', k: 118, s: 'OFF' }, { n: 'Barra de proteína amendoim', p: '45 g', k: 172, s: 'OFF' }
+];
+const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const REPLIES = {
+  'Estourei hoje, e agora?': 'Tudo bem — um dia não define sua semana. Sua média dos últimos 7 dias segue perto da meta. No jantar, mantenha a proteína do plano e reduza o carboidrato pela metade. Amanhã, siga o plano normal, sem compensar com jejum.',
+  'Posso trocar o arroz por batata?': 'Pode. Seu plano permite essa substituição: 4 colheres de arroz (120 g) equivalem a 1 batata inglesa média cozida (cerca de 200 g). Prefira cozida ou assada, sem manteiga.',
+  'O que comer no lanche?': 'Seu lanche da tarde tem cerca de 200 kcal. Opções do plano: 1 fruta + 30 g de castanhas, ou iogurte natural com 1 colher de aveia. O iogurte ajuda a fechar a proteína do dia.',
+  'Como está minha semana?': 'Aderência de 82% e tendência de −0,4 kg por semana. Ponto forte: café da manhã registrado todos os dias. Para melhorar: o lanche da tarde saiu do plano 3 vezes.'
+};
+const CHIPS = Object.keys(REPLIES);
+const DIET = [
+  { id: 'cafe', name: 'Café da manhã', time: '07:30', kcal: 350, items: ['2 ovos mexidos', '1 fatia de pão integral (25 g)', 'Café sem açúcar'], subs: ['Pão ↔ 2 col. de tapioca', 'Ovos ↔ 30 g de queijo branco'] },
+  { id: 'lanche1', name: 'Lanche da manhã', time: '10:00', kcal: 180, items: ['Iogurte natural (170 g)', '1 fruta média'], subs: ['Iogurte ↔ 200 ml de leite desnatado'] },
+  { id: 'almoco', name: 'Almoço', time: '12:30', kcal: 550, items: ['Arroz: 4 col. (120 g)', 'Feijão: 1 concha (100 g)', 'Frango ou patinho: 120–150 g', 'Salada à vontade + 1 col. chá de azeite'], subs: ['Arroz ↔ batata 200 g', 'Arroz ↔ mandioca 100 g', 'Frango ↔ peixe 150 g'] },
+  { id: 'lanche2', name: 'Lanche da tarde', time: '16:00', kcal: 200, items: ['1 fruta', '30 g de castanhas'], subs: ['Castanhas ↔ 1 col. de pasta de amendoim'] },
+  { id: 'jantar', name: 'Jantar', time: '19:30', kcal: 450, items: ['Proteína magra: 120 g', 'Legumes à vontade', 'Carboidrato: 2 col. (60 g)'], subs: ['Jantar ↔ omelete de 2 ovos + salada'] }
+];
+const AUTO_SHARE = [
+  { id: 'cafe', name: 'Café da manhã', time: '07:30', share: .25 }, { id: 'lanche1', name: 'Lanche da manhã', time: '10:00', share: .1 },
+  { id: 'almoco', name: 'Almoço', time: '12:30', share: .3 }, { id: 'lanche2', name: 'Lanche da tarde', time: '16:00', share: .1 },
+  { id: 'jantar', name: 'Jantar', time: '19:30', share: .25 }
+];
+const r10 = n => Math.round(n / 10) * 10;
+const autoSug = (id, k) => ({
+  cafe: '2 ovos + ' + Math.max(1, Math.round((k - 150) / 70)) + ' fatia(s) de pão integral + 1 fruta',
+  lanche1: 'Iogurte natural + ' + Math.max(1, Math.round((k - 110) / 40)) + ' col. de aveia',
+  almoco: r10(k * .3 / 1.28) + ' g de arroz + ' + r10(k * .15 / .76) + ' g de feijão + ' + r10(k * .4 / 1.59) + ' g de frango + salada à vontade',
+  lanche2: '1 fruta + ' + Math.max(10, r10((k - 70) / 6)) + ' g de castanhas',
+  jantar: r10(k * .45 / 1.59) + ' g de frango ou peixe + ' + r10(k * .3 / .77) + ' g de batata-doce + legumes'
+}[id]);
+const CONSIST = '2222122222220222212222221022'.split('');
+
+class Component extends DCLogic {
+  state = {
+    active: 'hoje', proto: null, dark: null, mint: null,
+    analyzing: true, items: initItems(), qs: initQs(), correcting: -1, confirmed: false, discarded: false, lastAddKcal: 0,
+    diaries: initDiaries(), dayIdx: 6, diaryMode: 'dia', editing: null, deleted: null,
+    planMode: 'nutro', dietGoals: { kcal: 1800, p: 130, c: 180, g: 55, f: 30 }, dietMeals: DIET, openMeal: 'almoco', importing: false, toastPlano: null,
+    body: { sexo: 'M', idade: 38, altura: 178, peso: 88, atividade: 'mod', ritmo: .5 },
+    regTab: 'recentes', tray: [], mealText: '',
+    water: 6, period: '12s', query: '', regMeal: 'almoco',
+    msgs: [{ from: 'user', text: 'Posso trocar o arroz por batata?' }, { from: 'agent', text: REPLIES['Posso trocar o arroz por batata?'] }],
+    typing: false, chatInput: '', shown: 670,
+    toastHoje: null, toastDiario: null, toastAgente: null, toastReg: null
+  };
+  searchRef = React.createRef();
+  chatRef = React.createRef();
+
+  componentDidMount() { this._target = this.dayTotals(6).kcal; this.startAnalysis(); }
+  componentWillUnmount() { clearTimeout(this._an); cancelAnimationFrame(this._raf); }
+  componentDidUpdate(pp, ps) {
+    const t = Math.round(this.dayTotals(6).kcal);
+    if (t !== this._target) this.animateTo(t);
+    if (ps.msgs.length !== this.state.msgs.length || ps.typing !== this.state.typing) {
+      const el = this.chatRef.current; if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    }
+  }
+  animateTo(t) {
+    const from = this.state.shown; this._target = t; const st = performance.now();
+    cancelAnimationFrame(this._raf);
+    const step = now => { const k = Math.min(1, (now - st) / 1300); const e = 1 - Math.pow(1 - k, 3); this.setState({ shown: from + (t - from) * e }); if (k < 1) this._raf = requestAnimationFrame(step); };
+    this._raf = requestAnimationFrame(step);
+  }
+  toast(key, text, ms = 3000) { this.setState({ [key]: text }); clearTimeout(this['_t' + key]); this['_t' + key] = setTimeout(() => this.setState({ [key]: null }), ms); }
+
+  isProto() { return this.state.proto ?? (this.props.modo === 'Protótipo'); }
+  navTo = id => { if (id === 'analise') this.startAnalysis(); this.setState({ active: id, proto: true }); };
+  startAnalysis() {
+    clearTimeout(this._an);
+    this.setState({ analyzing: true, items: initItems(), qs: initQs(), correcting: -1, confirmed: false, discarded: false });
+    this._an = setTimeout(() => this.setState({ analyzing: false }), 2300);
+  }
+  setGrams(i, v) { v = Math.max(0, Math.min(999, Math.round(+v || 0))); this.setState(s => ({ items: s.items.map((x, j) => j === i ? { ...x, g: v } : x) })); }
+  pickAlt(i, key) {
+    this.setState(s => {
+      const items = s.items.map((x, j) => j === i ? { ...x, key, alts: [x.key, ...x.alts.filter(a => a !== key)], conf: 100, by: 'corrigido' } : x);
+      let qs = s.qs;
+      if (key === 'frangoFrito' || key === 'frango') qs = qs.map(q => q.id === 'preparo' ? { ...q, ans: key === 'frango' ? 'Grelhado' : 'Frito' } : q);
+      return { items, qs, correcting: -1 };
+    });
+  }
+  answer(qid, opt) {
+    this.setState(s => {
+      let items = s.items;
+      if (qid === 'preparo') items = items.map(x => (x.key === 'frango' || x.key === 'frangoFrito') ? { ...x, key: opt === 'Frito' ? 'frangoFrito' : 'frango', conf: 100, by: 'informado' } : x);
+      if (qid === 'azeite') {
+        items = items.filter(x => x.key !== 'azeite');
+        if (opt.startsWith('Sim')) items = [...items, { key: 'azeite', g: 8, conf: 100, alts: [], by: 'informado' }];
+      }
+      return { items, qs: s.qs.map(q => q.id === qid ? { ...q, ans: opt } : q) };
+    });
+  }
+  totals(items) {
+    const t = { kcal: 0, p: 0, c: 0, g: 0, f: 0 };
+    items.forEach(x => { const f = F[x.key]; ['kcal', 'p', 'c', 'g', 'f'].forEach(k => t[k] += f[k] * x.g); });
+    return t;
+  }
+  confirmMeal = () => {
+    const t = this.totals(this.state.items);
+    const desc = this.state.items.map(x => F[x.key].short).join(', ');
+    const entry = { id: ++UID, time: '12:41', meal: 'almoco', title: 'Almoço', desc, kcal: t.kcal, p: t.p, c: t.c, g: t.g, f: t.f, fora: false, photo: true, mult: 1 };
+    this.setState(s => ({ confirmed: true, lastAddKcal: fmt(t.kcal), diaries: { ...s.diaries, 6: [...s.diaries[6], entry].sort((a, b) => a.time.localeCompare(b.time)) } }));
+    this.toast('toastHoje', '+' + fmt(t.kcal) + ' kcal · Almoço adicionado', 3600);
+    if (this.isProto()) setTimeout(() => this.setState({ active: 'hoje' }), 1100);
+  };
+  dayTotals(i) {
+    const t = { kcal: 0, p: 0, c: 0, g: 0, f: 0 };
+    (this.state.diaries[i] || []).forEach(e => ['kcal', 'p', 'c', 'g', 'f'].forEach(k => t[k] += e[k] * e.mult));
+    return t;
+  }
+  updEntry(id, fn) { this.setState(s => { const d = s.dayIdx; return { diaries: { ...s.diaries, [d]: s.diaries[d].map(e => e.id === id ? fn(e) : e) } }; }); }
+  deleteEntry(id) {
+    this.setState(s => { const d = s.dayIdx; const e = s.diaries[d].find(x => x.id === id); return { deleted: { d, e }, editing: null, diaries: { ...s.diaries, [d]: s.diaries[d].filter(x => x.id !== id) } }; });
+    this.toast('toastDiario', 'Registro excluído · total recalculado', 4500);
+  }
+  send(text) {
+    if (!text || !text.trim()) return;
+    this.setState(s => ({ msgs: [...s.msgs, { from: 'user', text }], typing: true, chatInput: '' }));
+    setTimeout(() => this.setState(s => ({ typing: false, msgs: [...s.msgs, { from: 'agent', text: REPLIES[text] || 'Boa pergunta. Vou olhar seus registros e o plano. Se envolver mudar meta ou porção, coloco na proposta para o nutrólogo — eu não altero metas sozinho.' }] })), 1400);
+  }
+
+  autoGoals() {
+    const b = this.state.body; const fac = { sed: 1.2, leve: 1.375, mod: 1.55, alta: 1.725 }[b.atividade];
+    const bmr = 10 * b.peso + 6.25 * b.altura - 5 * b.idade + (b.sexo === 'M' ? 5 : -161);
+    const tdee = bmr * fac, def = b.ritmo * 1100, floor = b.sexo === 'M' ? 1500 : 1200;
+    const kcal = Math.max(floor, r10(tdee - def));
+    const p = Math.round(Math.min(1.8 * b.peso, kcal * .35 / 4)), g = Math.round(kcal * .27 / 9), c = Math.round((kcal - p * 4 - g * 9) / 4), f = Math.max(25, Math.round(kcal * 14 / 1000));
+    return { kcal, p, c, g, f, tdee: r10(tdee), def: Math.round(def), floored: tdee - def < floor };
+  }
+  meta() { return this.state.planMode === 'auto' ? this.autoGoals() : this.state.dietGoals; }
+  planList() {
+    if (this.state.planMode === 'auto') { const k = this.autoGoals().kcal; return AUTO_SHARE.map(m => ({ ...m, kcal: r10(k * m.share) })); }
+    return this.state.dietMeals.map(m => ({ id: m.id, name: m.name, time: m.time, kcal: m.kcal }));
+  }
+  setBody(k, v) { this.setState(s => ({ body: { ...s.body, [k]: v } })); }
+  renderVals() {
+    const s = this.state;
+    const META = this.meta(); const PLAN = this.planList(); const isAutoMode = s.planMode === 'auto';
+    const lunch = PLAN.find(p => p.id === 'almoco') || PLAN[0];
+    const PLAN_LUNCH = { kcal: lunch.kcal, p: Math.round(META.p * lunch.kcal / META.kcal), c: Math.round(META.c * lunch.kcal / META.kcal) };
+    const proto = this.isProto();
+    const dark = s.dark ?? (this.props.tema === 'Escuro');
+    const mint = s.mint ?? (this.props.corPrincipal === 'Verde-menta');
+    const v = {};
+    if (dark) Object.assign(v, { '--bg': '#0C1213', '--card': '#151D1E', '--card2': '#1D2728', '--ink': '#E8F0EF', '--ink2': '#9AACAD', '--line': '#283436', '--track': '#243032', '--pri': '#5BC0C8', '--priSoft': '#163439', '--priInk': '#93DEE3', '--onPri': '#04272B', '--amb': '#F2B451', '--ambSoft': '#33270F', '--ambLine': '#C8913A', '--ph1': '#1A2324', '--ph2': '#202B2C', '--bar': 'rgba(17,24,25,.92)', '--shadow': '0 0 0 1px rgba(255,255,255,.03)' });
+    if (mint) Object.assign(v, dark ? { '--pri': '#62D3B4', '--priSoft': '#143329', '--priInk': '#9BE6CF', '--onPri': '#04261C' } : { '--pri': '#12806A', '--priSoft': '#DCF2EA', '--priInk': '#0B5C4C', '--onPri': '#FFFFFF' });
+    const all = !proto;
+    const vis = { board: all };
+    ['analise', 'hoje', 'registrar', 'diario', 'progresso', 'agente', 'plano'].forEach(k => vis[k] = all || s.active === k);
+
+    // Análise
+    const tot = this.totals(s.items);
+    const items = s.items.map((x, i) => {
+      const f = F[x.key]; const isOil = x.key === 'azeite';
+      const hi = x.conf >= 85, mid = x.conf >= 70;
+      return {
+        name: f.name, grams: x.g, max: isOil ? 30 : 400, step: isOil ? 1 : 5, dot: DOTS[i % 5],
+        kcal: fmt(f.kcal * x.g), p: fmt(f.p * x.g), c: fmt(f.c * x.g), g: fmt(f.g * x.g), f: fmt(f.f * x.g),
+        confText: x.by ? (x.by === 'corrigido' ? 'Corrigido por você' : 'Informado por você') : (hi ? 'Confiança alta' : mid ? 'Confiança média' : 'Confiança baixa · confirme') + ' ' + x.conf + '%',
+        confBg: x.by || hi ? 'var(--priSoft)' : 'var(--ambSoft)', confFg: x.by || hi ? 'var(--priInk)' : 'var(--amb)',
+        onSlide: e => this.setGrams(i, e.target.value), onField: e => this.setGrams(i, e.target.value),
+        minus: () => this.setGrams(i, x.g - (isOil ? 2 : 10)), plus: () => this.setGrams(i, x.g + (isOil ? 2 : 10)),
+        correcting: s.correcting === i, correctLabel: s.correcting === i ? 'Fechar' : 'Corrigir',
+        onCorrect: () => this.setState({ correcting: s.correcting === i ? -1 : i }),
+        alts: x.alts.map(a => ({ name: F[a].name, onPick: () => this.pickAlt(i, a) })),
+        onRemove: () => this.setState(st => ({ items: st.items.filter((_, j) => j !== i), correcting: -1 }))
+      };
+    });
+    const tags = s.items.map((x, i) => ({ ...TAGPOS[i % 5], name: F[x.key].short, conf: x.by ? '✓' : x.conf + '%', dot: DOTS[i % 5] }));
+    const okRow = (label, val, plan, unit, tol, lowIsBad) => {
+      const d = val - plan; const over = !lowIsBad && d > plan * tol; const under = lowIsBad && d < -plan * tol;
+      return { label, val: fmt(val) + ' / ' + fmt(plan) + ' ' + unit, note: over ? '+' + fmt(d) + ' ' + unit : under ? fmt(d) + ' ' + unit : 'ok', dot: over || under ? 'var(--ambLine)' : 'var(--pri)', fg: over || under ? 'var(--amb)' : 'var(--pri)', bad: over || under };
+    };
+    const rows = [okRow('Calorias', tot.kcal, PLAN_LUNCH.kcal, 'kcal', .1), okRow('Carboidrato', tot.c, PLAN_LUNCH.c, 'g', .1), okRow('Proteína', tot.p, PLAN_LUNCH.p, 'g', .2, true)];
+    let headline = 'Dentro do planejado';
+    if (rows[1].bad && tot.c > PLAN_LUNCH.c) headline = 'Acima em carboidrato';
+    else if (rows[0].bad) headline = 'Acima do planejado';
+    else if (rows[2].bad) headline = 'Proteína abaixo do plano';
+    const anyBad = headline !== 'Dentro do planejado';
+    const cmp = { headline, rows, bg: anyBad ? 'var(--ambSoft)' : 'var(--priSoft)', fg: anyBad ? 'var(--amb)' : 'var(--priInk)' };
+    const qs = s.qs.map(q => ({ text: q.q, short: q.short, ans: q.ans, open: !q.ans, done: !!q.ans, onReopen: () => this.setState(st => ({ qs: st.qs.map(z => z.id === q.id ? { ...z, ans: null } : z) })), opts: q.opts.map(o => ({ label: o, onPick: () => this.answer(q.id, o) })) }));
+
+    // Hoje
+    const today = this.dayTotals(6);
+    const pct = Math.min(1, today.kcal / META.kcal);
+    const over = today.kcal > META.kcal;
+    const ring = {
+      offset: (603.19 * (1 - pct)).toFixed(1), color: over ? 'var(--amb)' : 'var(--pri)', shown: fmt(s.shown),
+      remaining: fmt(Math.abs(META.kcal - today.kcal)), remLabel: over ? 'acima da meta' : 'restantes', remColor: over ? 'var(--amb)' : 'var(--pri)', over
+    };
+    const mk = (label, key, color) => { const val = today[key], m = META[key]; const left = m - val; return { label, val: fmt(val), meta: m, pct: Math.min(100, val / m * 100).toFixed(1) + '%', color, note: left > 0 ? 'faltam ' + fmt(left) + ' g' : 'meta atingida' }; };
+    const macros = [mk('Proteína', 'p', 'var(--mP)'), mk('Carboidrato', 'c', 'var(--mC)'), mk('Gordura', 'g', 'var(--mG)'), mk('Fibra', 'f', 'var(--mF)')];
+    const ents = s.diaries[6];
+    let nextFound = false;
+    const planMeals = PLAN.map(p => {
+      const mine = ents.filter(e => e.meal === p.id); const done = mine.length > 0;
+      const isNext = !done && !nextFound; if (isNext) nextFound = true;
+      const k = mine.reduce((a, e) => a + e.kcal * e.mult, 0);
+      return { time: p.time, name: p.name, sub: done ? fmt(k) + ' de ~' + p.kcal + ' kcal' : '~' + p.kcal + (isAutoMode ? ' kcal · sugestão do Leve' : ' kcal no plano'), isNext, showBadge: !isNext, status: done ? 'Feita ✓' : 'Pendente', bg: done ? 'var(--priSoft)' : 'var(--card2)', fg: done ? 'var(--priInk)' : 'var(--ink2)', border: isNext ? 'var(--pri)' : 'transparent' };
+    });
+    ents.filter(e => e.fora).forEach(e => planMeals.push({ time: e.time, name: e.title, sub: fmt(e.kcal * e.mult) + ' kcal · ' + e.desc, isNext: false, showBadge: true, status: 'Fora do plano', bg: 'var(--ambSoft)', fg: 'var(--amb)', border: 'var(--ambLine)' }));
+    const doneCount = PLAN.filter(p => ents.some(e => e.meal === p.id)).length;
+    const cups = Array.from({ length: 8 }, (_, i) => ({ bg: 'var(--card2)', fill: i < s.water ? '100%' : '0%', label: 'Copo ' + (i + 1), onClick: () => this.setState({ water: s.water === i + 1 ? i : i + 1 }) }));
+
+    // Registrar
+    const regMeals = [['cafe', 'Café'], ['lanche1', 'Lanche manhã'], ['almoco', 'Almoço'], ['lanche2', 'Lanche tarde'], ['jantar', 'Jantar'], ['extra', 'Extra']].map(([id, label]) => { const on = s.regMeal === id; return { label, onClick: () => this.setState({ regMeal: id }), bg: on ? 'var(--ink)' : 'var(--card)', fg: on ? 'var(--bg)' : 'var(--ink)', border: on ? 'var(--ink)' : 'var(--line)' }; });
+    const q = norm(s.query.trim());
+    const found = q ? SEARCH.filter(r => norm(r.n).includes(q)) : SEARCH.slice(0, 4);
+    const MEAL_LABEL = { cafe: 'café da manhã', lanche1: 'lanche da manhã', almoco: 'almoço', lanche2: 'lanche da tarde', jantar: 'jantar', extra: 'extra' };
+    const listSrc = q ? found : s.regTab === 'recentes' ? SEARCH.slice(0, 5) : s.regTab === 'favoritos' ? [3, 5, 8, 10].map(i => SEARCH[i]) : [];
+    const addTray = r => this.setState(st => { const ex = st.tray.find(t => t.n === r.n); return { tray: ex ? st.tray.map(t => t.n === r.n ? { ...t, qty: t.qty + 1 } : t) : [...st.tray, { n: r.n, k: r.k, qty: 1 }] }; });
+    const decTray = r => this.setState(st => ({ tray: st.tray.map(t => t.n === r.n ? { ...t, qty: t.qty - 1 } : t).filter(t => t.qty > 0) }));
+    const results = listSrc.slice(0, 6).map((r, i) => { const t = s.tray.find(x => x.n === r.n); return { name: r.n, portion: r.p, kcal: r.k, src: r.s === 'OFF' ? 'OPEN FOOD FACTS' : 'TACO', border: i ? 'var(--line)' : 'transparent', inTray: !!t, notIn: !t, qty: t ? t.qty : 0, onAdd: () => addTray(r), onDec: () => decTray(r) }; });
+    const regPlan = PLAN.find(p => p.id === s.regMeal);
+    const dm = s.dietMeals.find(m => m.id === s.regMeal);
+    const planCard = regPlan ? { title: (isAutoMode ? 'Sugestão · ' : 'Do plano · ') + regPlan.name, kcal: fmt(regPlan.kcal), items: isAutoMode ? [{ t: autoSug(regPlan.id, regPlan.kcal) }] : (dm ? dm.items.map(t => ({ t })) : []) } : { title: 'Refeição extra', kcal: '0', items: [{ t: 'Extras não fazem parte do plano — registre por foto ou busca.' }] };
+    const trayK = s.tray.reduce((a, t) => a + t.k * t.qty, 0);
+    const trayQty = s.tray.reduce((a, t) => a + t.qty, 0);
+    const addEntry = (kcal, desc) => {
+      const e = { id: ++UID, time: '12:45', meal: s.regMeal, title: s.regMeal === 'extra' ? 'Extra' : (regPlan ? regPlan.name : 'Refeição'), desc, kcal, p: kcal * .06, c: kcal * .11, g: kcal * .035, f: kcal * .01, fora: s.regMeal === 'extra', photo: false, mult: 1 };
+      this.setState(st => ({ tray: [], diaries: { ...st.diaries, 6: [...st.diaries[6], e].sort((a, b) => a.time.localeCompare(b.time)) } }));
+      this.toast('toastReg', 'Adicionado ao ' + MEAL_LABEL[s.regMeal] + ' · +' + fmt(kcal) + ' kcal');
+      this.toast('toastHoje', '+' + fmt(kcal) + ' kcal · ' + e.title + ' adicionado', 3600);
+    };
+
+    // Diário
+    const di = s.dayIdx; const dd = DAYS[di]; const dt = this.dayTotals(di);
+    const day = { label: di === 6 ? 'Hoje' : di === 7 ? 'Amanhã' : di === 5 ? 'Ontem' : dd.long, sub: dd.long + ', ' + dd.n + ' de outubro' };
+    const dOver = dt.kcal > META.kcal * 1.05;
+    const dayTot = { kcal: fmt(dt.kcal), p: fmt(dt.p), c: fmt(dt.c), g: fmt(dt.g), f: fmt(dt.f), pct: Math.min(100, dt.kcal / META.kcal * 100).toFixed(1) + '%', bar: dOver ? 'var(--ambLine)' : 'var(--pri)', status: di === 7 ? 'ainda não começou' : dOver ? 'acima da meta' : di === 6 ? 'em andamento' : 'dentro da meta', statusFg: dOver ? 'var(--amb)' : 'var(--ink2)' };
+    const entries = (s.diaries[di] || []).map(e => {
+      const ed = s.editing === e.id;
+      return {
+        time: e.time, title: e.title, desc: e.desc, kcal: fmt(e.kcal * e.mult), fora: e.fora, border: e.fora ? 'var(--ambLine)' : 'transparent',
+        thumbBg: e.photo ? 'repeating-linear-gradient(135deg,var(--ph1) 0 5px,var(--ph2) 5px 10px)' : 'var(--card2)', thumbLabel: e.photo ? 'foto' : 'texto',
+        editing: ed, editLabel: ed ? 'Pronto' : 'Editar', multText: dec(e.mult, 2).replace(/,?0+$/, '') + '×',
+        onEdit: () => this.setState({ editing: ed ? null : e.id }), onDelete: () => this.deleteEntry(e.id),
+        dec: () => this.updEntry(e.id, x => ({ ...x, mult: Math.max(.25, x.mult - .25) })), inc: () => this.updEntry(e.id, x => ({ ...x, mult: Math.min(3, x.mult + .25) }))
+      };
+    });
+    const dayK = i => i === 6 ? today.kcal : this.dayTotals(i).kcal;
+    const strip = DAYS.slice(0, 7).map((d, i) => { const on = i === di; const k = dayK(i); const hi = k > META.kcal * 1.05; return { d: d.d, n: d.n, h: Math.max(3, Math.min(24, k / 2400 * 24)) + 'px', bg: on ? 'var(--ink)' : 'var(--card)', fg: on ? 'var(--bg)' : 'var(--ink)', bar: hi ? 'var(--ambLine)' : (on ? 'var(--bg)' : 'var(--pri)'), onClick: () => this.setState({ dayIdx: i, editing: null }) }; });
+    const weekVals = DAYS.slice(0, 7).map((d, i) => dayK(i));
+    const weekRows = DAYS.slice(0, 7).map((d, i) => { const k = weekVals[i]; return { label: i === 6 ? 'Hoje' : d.d + ' ' + d.n, kcal: fmt(k), pct: Math.min(100, k / 2400 * 100) + '%', color: k > META.kcal * 1.05 ? 'var(--ambLine)' : 'var(--pri)', onClick: () => this.setState({ dayIdx: i, diaryMode: 'dia' }) }; });
+    const isDay = s.diaryMode === 'dia';
+    const seg = { diaBg: isDay ? 'var(--card)' : 'transparent', semBg: isDay ? 'transparent' : 'var(--card)', diaSh: isDay ? 'var(--shadow)' : 'none', semSh: isDay ? 'none' : 'var(--shadow)' };
+
+    // Progresso
+    const n = s.period === '4s' ? 28 : 84;
+    const raw = WEIGHT.slice(-n), ma = MA.slice(-n);
+    let mn = Math.floor(Math.min(...raw, ...ma) - .3), mx = Math.ceil(Math.max(...raw, ...ma) + .3);
+    const W = 280, H = 150, X = i => i / (n - 1) * W, Y = val => H - (val - mn) / (mx - mn) * H;
+    const path = ma.map((val, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(val).toFixed(1)).join(' ');
+    const r0 = n > 40 ? 1.6 : 2.4;
+    const dots = raw.map((val, i) => `M${(X(i) - r0).toFixed(1)} ${Y(val).toFixed(1)}a${r0} ${r0} 0 1 0 ${2 * r0} 0a${r0} ${r0} 0 1 0 ${-2 * r0} 0`).join('');
+    const gv = [0, 1, 2, 3].map(k => mn + (mx - mn) * k / 3);
+    const chart = {
+      path, dots, area: path + ` L${W} ${H} L0 ${H} Z`, grid: gv.map(val => `M0 ${Y(val).toFixed(1)} H${W}`).join(' '),
+      labels: gv.map(val => ({ y: (Y(val) + 10).toFixed(1) + 'px', label: dec(val, 0) })),
+      lx: X(n - 1).toFixed(1), ly: Y(ma[n - 1]).toFixed(1), trend: dec(ma[n - 1]), today: dec(raw[n - 1]),
+      delta: dec(ma[n - 1] - ma[0]).replace('-', '−') + ' kg em ' + (n === 28 ? '4' : '12') + ' sem'
+    };
+    const per = { aBg: n === 28 ? 'var(--card)' : 'transparent', bBg: n === 84 ? 'var(--card)' : 'transparent' };
+    const kbars = weekVals.map(k => ({ h: Math.max(4, k / 2400 * 130).toFixed(0) + 'px', color: k > META.kcal * 1.05 ? 'var(--ambLine)' : 'var(--pri)' }));
+    const consist = CONSIST.map(c => ({ bg: c === '2' ? 'var(--pri)' : c === '1' ? 'var(--priSoft)' : 'var(--track)', border: c === '1' ? 'var(--pri)' : 'transparent' }));
+    const measures = [
+      { label: 'Cintura', val: '98', unit: 'cm', delta: '−4,5 cm' }, { label: 'Quadril', val: '104', unit: 'cm', delta: '−2,0 cm' },
+      { label: 'Braço', val: '34', unit: 'cm', delta: '−1,0 cm' }, { label: 'Coxa', val: '60', unit: 'cm', delta: '−1,5 cm' },
+      { label: 'Gordura corporal', val: '27,4', unit: '%', delta: '−2,1 pts' }, { label: 'Massa magra', val: '63,5', unit: 'kg', delta: 'estável' }
+    ];
+
+    // Agente
+    const msgs = s.msgs.map(m => { const u = m.from === 'user'; return { text: m.text, align: u ? 'flex-end' : 'flex-start', bg: u ? 'var(--pri)' : 'var(--card)', fg: u ? 'var(--onPri)' : 'var(--ink)', radius: u ? '20px 20px 6px 20px' : '20px 20px 20px 6px' }; });
+    const dot = d => React.createElement('span', { style: { width: 7, height: 7, borderRadius: 4, background: 'var(--ink2)', animation: `dcBlink 1.2s ${d}s infinite` } });
+    const typingEl = React.createElement('div', { style: { alignSelf: 'flex-start', display: 'flex', gap: 5, padding: '14px 16px', borderRadius: '20px 20px 20px 6px', background: 'var(--card)', boxShadow: 'var(--shadow)' } }, dot(0), dot(.15), dot(.3));
+    const sh = { background: 'linear-gradient(90deg,var(--card2) 0%,var(--line) 50%,var(--card2) 100%)', backgroundSize: '480px 100%', animation: 'dcShimmer 1.3s linear infinite' };
+    const bar = (h, w, r = 12) => React.createElement('div', { style: { ...sh, height: h, width: w, borderRadius: r } });
+    const skeleton = React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 12 } },
+      React.createElement('div', { style: { background: 'var(--card)', borderRadius: 24, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 } }, bar(14, '40%', 7), bar(40, '55%'), React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 } }, bar(48, '100%'), bar(48, '100%'), bar(48, '100%'), bar(48, '100%'))),
+      ...[0, 1, 2].map(i => React.createElement('div', { key: i, style: { background: 'var(--card)', borderRadius: 20, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 } }, bar(16, '60%', 8), bar(44, '100%'))));
+    const scanLine = React.createElement('div', { style: { position: 'absolute', left: '6%', right: '6%', height: 3, borderRadius: 2, background: 'var(--pri)', boxShadow: '0 0 24px 6px var(--pri)', opacity: .8, animation: 'dcScan 2.2s ease-in-out infinite' } });
+
+    return {
+      themeVars: v, vis, rowJustify: proto ? 'center' : 'flex-start',
+      protoLabel: proto ? 'Ver todas as telas' : 'Abrir como protótipo',
+      darkLabel: dark ? 'Tema claro' : 'Tema escuro', accentLabel: mint ? 'Cor: azul-petróleo' : 'Cor: verde-menta',
+      toggleProto: () => this.setState({ proto: !proto }), toggleDark: () => this.setState({ dark: !dark }), toggleAccent: () => this.setState({ mint: !mint }),
+      navTo: this.navTo, goHoje: () => this.navTo('hoje'), goRegistrar: () => this.navTo('registrar'), goAgente: () => this.navTo('agente'), goAnalise: () => this.navTo('analise'),
+      analyzing: s.analyzing, ready: !s.analyzing, scanLine, skeleton, tags, items, itemsCount: s.items.length + ' itens', tot: { kcal: fmt(tot.kcal), p: fmt(tot.p), c: fmt(tot.c), g: fmt(tot.g), f: fmt(tot.f) },
+      cmp, qs, hasOpenQs: s.qs.some(x => !x.ans), confirmed: s.confirmed, discarded: s.discarded, lastAddKcal: s.lastAddKcal,
+      restartAnalysis: () => { this.startAnalysis(); this.setState({ active: 'analise' }); }, confirmMeal: this.confirmMeal, discardMeal: () => this.setState({ discarded: true, correcting: -1 }),
+      ring, macros, mealsDone: doneCount + ' de ' + PLAN.length, planMeals, cups, waterText: dec(s.water * .25, s.water % 4 === 0 ? 0 : 2).replace(/,?0+$/, '') + ' L', toastHoje: s.toastHoje,
+      regMeals, query: s.query, onQuery: e => this.setState({ query: e.target.value }), results, noResults: !!q && found.length === 0, searchTitle: q ? 'Resultados' : 'Recentes',
+      regCtx: (regPlan ? regPlan.name + ' · ~' + fmt(regPlan.kcal) + ' kcal ' + (isAutoMode ? 'sugeridas' : 'no plano') : 'Fora do plano') + ' · restam ' + fmt(Math.max(0, META.kcal - today.kcal)) + ' hoje',
+      regMealName: MEAL_LABEL[s.regMeal], mealText: s.mealText, hasMealText: s.mealText.trim().length > 0, onMealText: e => this.setState({ mealText: e.target.value }),
+      onMic: () => this.toast('toastReg', 'Ouvindo… fale o que você comeu'),
+      showTabs: !q, showSearchTitle: !!q, showList: !!q || s.regTab !== 'plano', showPlanTab: !q && s.regTab === 'plano',
+      regTabs: [['recentes', 'Recentes'], ['favoritos', 'Favoritos'], ['plano', 'Do plano']].map(([id, label]) => { const on = s.regTab === id; return { label, bg: on ? 'var(--card)' : 'transparent', sh: on ? 'var(--shadow)' : 'none', onClick: () => this.setState({ regTab: id }) }; }),
+      planCard, addPlanMeal: () => regPlan && addEntry(regPlan.kcal, isAutoMode ? autoSug(regPlan.id, regPlan.kcal) : (dm ? dm.items.join(', ') : '')),
+      hasTray: s.tray.length > 0, trayKcal: fmt(trayK), trayCount: trayQty + (trayQty > 1 ? ' itens' : ' item'), trayNames: s.tray.map(t => (t.qty > 1 ? t.qty + '× ' : '') + t.n).join(', '),
+      clearTray: () => this.setState({ tray: [] }), confirmTray: () => addEntry(trayK, s.tray.map(t => (t.qty > 1 ? t.qty + '× ' : '') + t.n).join(', ')),
+      searchRef: this.searchRef, focusSearch: () => this.searchRef.current && this.searchRef.current.focus(),
+      onBarcode: () => this.toast('toastReg', 'Câmera aberta para ler o código de barras'), repeatYesterday: () => this.setState(st => ({ tray: st.tray.some(t => t.n === 'Refeição de ontem') ? st.tray : [...st.tray, { n: 'Refeição de ontem', k: 590, qty: 1 }] })), toastReg: s.toastReg,
+      isDayView: isDay, isWeekView: !isDay, setDia: () => this.setState({ diaryMode: 'dia' }), setSemana: () => this.setState({ diaryMode: 'semana' }), seg,
+      day, dayTot, entries, dayEmpty: entries.length === 0, strip, weekRows, weekAvg: fmt(weekVals.reduce((a, b) => a + b, 0) / 7),
+      prevDay: () => this.setState({ dayIdx: Math.max(0, di - 1), editing: null }), nextDay: () => this.setState({ dayIdx: Math.min(7, di + 1), editing: null }),
+      toastDiario: s.toastDiario, undoDelete: () => { const dl = s.deleted; if (!dl) return; this.setState(st => ({ deleted: null, toastDiario: null, diaries: { ...st.diaries, [dl.d]: [...st.diaries[dl.d], dl.e].sort((a, b) => a.time.localeCompare(b.time)) } })); },
+      chart, per, setP4: () => this.setState({ period: '4s' }), setP12: () => this.setState({ period: '12s' }), kbars, consist, measures,
+      msgs, typing: s.typing, typingEl, chatRef: this.chatRef, chips: CHIPS.map(c => ({ label: c, onClick: () => this.send(c) })),
+      chatInput: s.chatInput, onChatInput: e => this.setState({ chatInput: e.target.value }), onChatKey: e => { if (e.key === 'Enter') this.send(s.chatInput); }, sendInput: () => this.send(s.chatInput),
+      planBadge: isAutoMode ? 'Meta calculada' : 'Meta do nutrólogo', metaK: fmt(META.kcal), mealsTitle: isAutoMode ? 'Sugestão de refeições' : 'Refeições do plano', planLink: isAutoMode ? 'Ajustar' : 'Ver plano',
+      goPlano: () => this.navTo('plano'), cmpTitle: isAutoMode ? 'Comparado à sugestão para o almoço' : 'Comparado ao almoço do plano',
+      metaPct: Math.min(100, META.kcal / 2400 * 100).toFixed(1) + '%', metaLine: (Math.min(1, META.kcal / 2400) * 130).toFixed(1) + 'px',
+      isNutro: !isAutoMode, isAuto: isAutoMode, setNutro: () => this.setState({ planMode: 'nutro' }), setAuto: () => this.setState({ planMode: 'auto' }),
+      pmSel: { nBorder: isAutoMode ? 'var(--line)' : 'var(--pri)', nBg: isAutoMode ? 'var(--card)' : 'var(--priSoft)', nDot: isAutoMode ? 'transparent' : 'var(--pri)', aBorder: isAutoMode ? 'var(--pri)' : 'var(--line)', aBg: isAutoMode ? 'var(--priSoft)' : 'var(--card)', aDot: isAutoMode ? 'var(--pri)' : 'transparent' },
+      importing: s.importing, importDiet: () => { this.setState({ importing: true }); setTimeout(() => { this.setState({ importing: false }); this.toast('toastPlano', 'Dieta lida: 5 refeições · ' + fmt(s.dietGoals.kcal) + ' kcal. Revise e salve.', 3600); }, 1800); },
+      editManual: () => this.toast('toastPlano', 'Toque em uma refeição para editar porções e substituições'),
+      goalFields: [['kcal', 'Calorias', 'kcal', 'var(--pri)'], ['p', 'Proteína', 'g', 'var(--mP)'], ['c', 'Carboidrato', 'g', 'var(--mC)'], ['g', 'Gordura', 'g', 'var(--mG)'], ['f', 'Fibra', 'g', 'var(--mF)']].map(([k, label, unit, color]) => ({ label, unit, color, value: s.dietGoals[k], onChange: e => { const val = Math.max(0, Math.round(+e.target.value || 0)); this.setState(st => ({ dietGoals: { ...st.dietGoals, [k]: val } })); } })),
+      dietCount: s.dietMeals.length + ' refeições', dietMeals: s.dietMeals.map(m => { const open = s.openMeal === m.id; return { time: m.time, name: m.name, kcal: m.kcal, subsCount: m.subs.length + (m.subs.length > 1 ? ' substituições' : ' substituição'), open, rot: open ? '90deg' : '0deg', items: m.items.map(t => ({ t })), subs: m.subs.map(t => ({ t })), onToggle: () => this.setState({ openMeal: open ? null : m.id }) }; }),
+      sexo: { mBg: s.body.sexo === 'M' ? 'var(--card)' : 'transparent', fBg: s.body.sexo === 'F' ? 'var(--card)' : 'transparent', mSh: s.body.sexo === 'M' ? 'var(--shadow)' : 'none', fSh: s.body.sexo === 'F' ? 'var(--shadow)' : 'none' },
+      setM: () => this.setBody('sexo', 'M'), setF: () => this.setBody('sexo', 'F'),
+      bodyFields: [['idade', 'Idade', 1, ' anos', 14, 99], ['altura', 'Altura', 1, ' cm', 130, 220], ['peso', 'Peso', .5, ' kg', 40, 250]].map(([k, label, st, unit, mn, mx]) => ({ label, val: (st < 1 ? dec(s.body[k]) : s.body[k]) + unit, dec: () => this.setBody(k, Math.max(mn, s.body[k] - st)), inc: () => this.setBody(k, Math.min(mx, s.body[k] + st)) })),
+      activity: [['sed', 'Sedentário'], ['leve', 'Leve'], ['mod', 'Moderada'], ['alta', 'Alta']].map(([id, label]) => { const on = s.body.atividade === id; return { label, onClick: () => this.setBody('atividade', id), bg: on ? 'var(--ink)' : 'var(--card)', fg: on ? 'var(--bg)' : 'var(--ink)', border: on ? 'var(--ink)' : 'var(--line)' }; }),
+      ritmos: [.25, .5, .75].map(r => { const on = s.body.ritmo === r; return { label: dec(r, 2).replace(/0$/, '') + ' kg/semana', onClick: () => this.setBody('ritmo', r), bg: on ? 'var(--ink)' : 'var(--card)', fg: on ? 'var(--bg)' : 'var(--ink)', border: on ? 'var(--ink)' : 'var(--line)' }; }),
+      ag: (() => { const a = this.autoGoals(); return { kcal: fmt(a.kcal), tdee: fmt(a.tdee), def: fmt(a.def), p: a.p, c: a.c, g: a.g, f: a.f, floored: a.floored }; })(),
+      autoMeals: isAutoMode ? PLAN.map(m => ({ time: m.time, name: m.name, kcal: fmt(m.kcal), sug: autoSug(m.id, m.kcal) })) : (() => { const k = this.autoGoals().kcal; return AUTO_SHARE.map(m => { const mk2 = r10(k * m.share); return { time: m.time, name: m.name, kcal: fmt(mk2), sug: autoSug(m.id, mk2) }; }); })(),
+      toastPlano: s.toastPlano,
+      exportPdf: () => this.toast('toastAgente', 'PDF da proposta gerado · pronto para enviar'), sharePdf: () => this.toast('toastAgente', 'Link da proposta copiado'), toastAgente: s.toastAgente
+    };
+  }
+}
+</script>
+</body>
+</html>

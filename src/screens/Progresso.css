@@ -1,0 +1,29 @@
+.ring-cap-sm { font: 600 calc(12 * var(--u)) var(--font); color: var(--ink2); letter-spacing: .04em; text-transform: uppercase; }
+.trend-num { font: 800 calc(48 * var(--u))/1 var(--display); letter-spacing: -.02em; }
+.chart { position: relative; height: 170px; }
+.chart svg { display: block; overflow: visible; }
+.chart .axis { font: 500 11px var(--font); fill: var(--ink2); paint-order: stroke; stroke: var(--card); stroke-width: 4px; }
+
+.card.measure { padding: 14px 16px; gap: 2px; }
+.measure-val { font: 700 calc(24 * var(--u)) var(--display); }
+.measure-delta { font: 700 calc(13 * var(--u)) var(--font); color: var(--pri); }
+
+.card.photos { padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.photo { height: 200px; border-radius: 16px; display: flex; align-items: flex-end; justify-content: center; padding: 10px; font-size: 10px; color: var(--ink2); }
+.photo-cap { font: 600 calc(13 * var(--u)) var(--font); text-align: center; }
+
+.kbars { position: relative; height: 130px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.kbars > div:not(.kbars-meta) { border-radius: 8px 8px 4px 4px; transition: height .8s; }
+.kbars-meta { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--ink2); opacity: .4; }
+.kbars-labels { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; text-align: center; font: 600 calc(12 * var(--u)) var(--font); color: var(--ink2); margin-top: -4px; }
+
+.adh-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 800 calc(24 * var(--u)) var(--display); }
+.consist { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.consist span { aspect-ratio: 1; border-radius: 5px; background: var(--track); border: 1.5px solid transparent; }
+.consist span.full { background: var(--pri); }
+.consist span.part { background: var(--priSoft); border-color: var(--pri); }
+
+.kg-field { display: flex; align-items: baseline; justify-content: center; gap: 6px; margin-top: 6px; }
+.kg-field input { width: 150px; border: 0; border-bottom: 2px solid var(--line); background: none; outline: none; color: var(--ink); text-align: center; font: 800 calc(46 * var(--u)) var(--display); padding: 4px 0; }
+.kg-field input:focus { border-color: var(--pri); }
+.kg-field span { font: 600 calc(16 * var(--u)) var(--font); color: var(--ink2); }

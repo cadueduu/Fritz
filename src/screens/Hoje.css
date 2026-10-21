@@ -1,0 +1,68 @@
+.hoje-head { align-items: center; }
+.hoje-date { font: 500 calc(14 * var(--u)) var(--font); color: var(--ink2); }
+.avatar { width: 46px; height: 46px; border-radius: 23px; border: 0; background: var(--priSoft); color: var(--priInk); display: flex; align-items: center; justify-content: center; font: 700 calc(15 * var(--u)) var(--font); flex: none; }
+
+.ring-card { position: relative; padding: 20px 22px 22px; gap: 0; }
+.ring { position: relative; width: 224px; height: 224px; margin: 10px auto 6px; }
+.ring svg { transform: rotate(-90deg); display: block; }
+.ring-arc { transition: stroke-dashoffset 1.3s cubic-bezier(.2, .8, .2, 1), stroke .4s; }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.ring-cap { font: 600 calc(12 * var(--u)) var(--font); color: var(--ink2); letter-spacing: .04em; text-transform: uppercase; }
+.ring-num { font: 800 min(calc(54 * var(--u)), 62px)/1 var(--display); letter-spacing: -.03em; }
+.ring-of { font: 500 calc(14 * var(--u)) var(--font); color: var(--ink2); }
+.ring-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.ring-stats .mid { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.ring-card .warn-box { margin-top: 14px; }
+.stat-num { font: 700 calc(20 * var(--u)) var(--display); }
+.stat-label { font: 500 calc(12 * var(--u)) var(--font); color: var(--ink2); }
+.ring-toast {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 18px;
+  background: var(--pri);
+  color: var(--onPri);
+  font: 700 calc(13 * var(--u)) var(--font);
+  white-space: nowrap;
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: pop .35s ease both;
+  box-shadow: 0 8px 20px -8px var(--pri);
+}
+
+.macros-card { gap: 14px; }
+.macro-row { display: flex; flex-direction: column; gap: 7px; }
+.macro-name { font: 600 calc(14 * var(--u)) var(--font); }
+.macro-val { font: 700 calc(14 * var(--u)) var(--font); }
+.macro-fill { transition: width 1.2s cubic-bezier(.2, .8, .2, 1); }
+
+.water-val { font: 700 calc(15 * var(--u)) var(--font); }
+.cups { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.cups button { height: 48px; border: 0; border-radius: 10px 10px 14px 14px; background: var(--card2); position: relative; overflow: hidden; padding: 0; }
+.cups button div { position: absolute; left: 0; right: 0; bottom: 0; background: var(--pri); opacity: .85; transition: height .3s; }
+.steps-row { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; }
+.steps-bar { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; margin-top: -4px; }
+.steps-bar div { height: 100%; background: var(--ink); opacity: .75; border-radius: 4px; }
+
+.meal-row {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1.5px solid transparent;
+}
+.meal-row.next { border-color: var(--pri); }
+.meal-row.fora { border-color: var(--ambLine); }
+.meal-time { width: 46px; flex: none; font: 600 calc(13 * var(--u)) var(--font); color: var(--ink2); }
+.meal-name { font: 600 calc(15 * var(--u)) var(--font); }
+.meal-sub { font: 500 calc(13 * var(--u)) var(--font); color: var(--ink2); }
+
+.tip { background: var(--priSoft); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+.tip-title { font: 700 calc(14 * var(--u)) var(--font); color: var(--priInk); }
+.tip-text { font: 500 calc(15 * var(--u))/1.5 var(--font); color: var(--ink); }

@@ -1,0 +1,64 @@
+:root {
+  --bg: #F4F6F5;
+  --card: #FFFFFF;
+  --card2: #EEF2F1;
+  --ink: #0F1D1E;
+  --ink2: #55676A;
+  --line: #E1E7E6;
+  --track: #E6ECEB;
+  --pri: #0F6670;
+  --priSoft: #DDEEEF;
+  --priInk: #0B4F57;
+  --onPri: #FFFFFF;
+  --amb: #8F5400;
+  --ambSoft: #FFF1D6;
+  --ambLine: #F0C77A;
+  --ph1: #E7ECEB;
+  --ph2: #F1F4F3;
+  --bar: rgba(255, 255, 255, .9);
+  --shadow: 0 1px 2px rgba(15, 29, 30, .04), 0 8px 24px rgba(15, 29, 30, .05);
+  --mP: oklch(0.6 0.13 255);
+  --mC: oklch(0.7 0.12 75);
+  --mG: oklch(0.6 0.13 330);
+  --mF: oklch(0.62 0.12 150);
+
+  --font: Figtree, system-ui, sans-serif;
+  --display: 'Bricolage Grotesque Variable', Figtree, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* one design pixel of type; rem-based so text follows the user's font size (and Dynamic Type on iOS) */
+  --u: calc(1rem / 16);
+  /* top safe area, with a floor for browsers without a status bar overlay */
+  --sat: max(env(safe-area-inset-top), 12px);
+  --sab: env(safe-area-inset-bottom);
+  color-scheme: light;
+}
+
+@supports (font: -apple-system-body) {
+  html { font: -apple-system-body; }
+  :root { --u: calc(1rem / 17); }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0C1213;
+    --card: #151D1E;
+    --card2: #1D2728;
+    --ink: #E8F0EF;
+    --ink2: #9AACAD;
+    --line: #283436;
+    --track: #243032;
+    --pri: #5BC0C8;
+    --priSoft: #163439;
+    --priInk: #93DEE3;
+    --onPri: #04272B;
+    --amb: #F2B451;
+    --ambSoft: #33270F;
+    --ambLine: #C8913A;
+    --ph1: #1A2324;
+    --ph2: #202B2C;
+    --bar: rgba(17, 24, 25, .92);
+    --shadow: 0 0 0 1px rgba(255, 255, 255, .03);
+    color-scheme: dark;
+  }
+}

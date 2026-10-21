@@ -1,0 +1,46 @@
+.agent-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: calc(var(--sat) + 4px) 20px 12px;
+  background: var(--bar);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.chat {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: calc(var(--sat) + 76px) 16px calc(236px + var(--sab));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.chat > .card { flex: none; }
+.bubble { max-width: 86%; padding: 12px 14px; box-shadow: var(--shadow); font: 500 calc(15 * var(--u))/1.45 var(--font); animation: pop .3s ease both; white-space: pre-wrap; }
+.bubble.agent { align-self: flex-start; border-radius: 20px 20px 20px 6px; background: var(--card); color: var(--ink); }
+.bubble.user { align-self: flex-end; border-radius: 20px 20px 6px 20px; background: var(--pri); color: var(--onPri); }
+.bubble.typing { display: flex; gap: 5px; padding: 14px 16px; }
+.bubble.typing span { width: 7px; height: 7px; border-radius: 4px; background: var(--ink2); animation: blink 1.2s infinite; }
+.bubble.typing span:nth-child(2) { animation-delay: .15s; }
+.bubble.typing span:nth-child(3) { animation-delay: .3s; }
+
+.sum-tile { background: var(--card2); border-radius: 14px; padding: 10px 12px; }
+.sum-tile div:first-child { font: 600 calc(11.5 * var(--u)) var(--font); color: var(--ink2); }
+.sum-tile div:last-child { font: 700 calc(19 * var(--u)) var(--font); }
+.card.proposal { padding: 18px; border: 1.5px solid var(--pri); }
+
+.composer { position: absolute; left: 0; right: 0; bottom: calc(90px + max(0px, var(--sab) - 28px)); padding: 10px 0 12px; background: var(--bg); z-index: 20; display: flex; flex-direction: column; gap: 10px; }
+.composer-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 16px; }
+.chat-input { flex: 1; min-width: 0; height: 48px; border-radius: 24px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); padding: 0 18px; font: 500 max(16px, calc(15 * var(--u))) var(--font); outline: none; }
+.chat-input::placeholder { color: var(--ink2); }
+.chat-input:focus { border-color: var(--pri); }
+.send { width: 48px; height: 48px; flex: none; border-radius: 24px; border: 0; background: var(--pri); color: var(--onPri); font: 700 18px var(--font); }
+.toast.agent-toast { top: calc(var(--sat) + 72px); }
