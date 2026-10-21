@@ -24,3 +24,4 @@
 .calc-num { font: 800 calc(46 * var(--u))/1 var(--display); letter-spacing: -.02em; }
 .card.auto-meal { padding: 14px 16px; flex-direction: row; gap: 12px; }
 .card.account { flex-direction: row; align-items: center; margin-top: 10px; }
+.date-in { height: 44px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); padding: 0 10px; font: 600 max(16px, calc(15 * var(--u))) var(--font); }

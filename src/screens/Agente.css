@@ -51,3 +51,4 @@
 .bubble.failure { background: var(--ambSoft); color: var(--amb); }
 .send:disabled { opacity: .5; }
 .card.action-card { padding: 16px; gap: 12px; border: 1.5px solid var(--pri); }
+.chat > .col > .noted { align-self: flex-start; padding: 4px 10px; border-radius: 10px; background: var(--priSoft); color: var(--priInk); font: 600 calc(12 * var(--u)) var(--font); }

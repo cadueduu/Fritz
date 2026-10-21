@@ -58,6 +58,11 @@ Dentro do Streamlit o app não registra o service worker, então não funciona o
 - **Refeição** — "comi 2 ovos e pão" vira kcal e macros com "Adicionar ao dia".
 - **Peso** e **água** — "pesei 82,4", "bebi 2 copos".
 - **Análise da semana** — em texto, com os números reais.
+- **Anamnese antes da dieta** — o agente conversa como um nutrólogo (objetivo, saúde, sono, intestino, álcool, fome, treino, rotina de cozinha…) e anota as respostas no perfil (`profiles.onboarding.anamnese`) para não perguntar de novo.
+
+## Cadastro e questionário
+
+O cadastro pede nome, data de nascimento, sexo, altura e peso (o peso vira a primeira pesagem). Depois, um questionário define o objetivo (emagrecer, cutting, bulking, recomposição ou manter) e o peso desejado, a atividade e os treinos, os horários do dia — de onde saem os horários das refeições — e restrições alimentares. Dá para refazer em Meu plano.
 
 Chaves em **Supabase → Edge Functions → Secrets**: `GEMINI_API_KEY` (crie grátis em aistudio.google.com) e, opcional, `GEMINI_MODEL` (padrão `gemini-flash-latest`). No plano gratuito o Google pode usar as conversas para melhorar os produtos dele.
 

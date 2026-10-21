@@ -102,6 +102,7 @@ export function Progresso() {
                 <div style={{ textAlign: 'right' }}>
                   <div className="badge ok" style={{ display: 'inline-block', padding: '6px 10px', fontSize: 'calc(14 * var(--u))' }}>{dec(chart.delta).replace('-', '−')} kg em {period === 28 ? 4 : 12} sem</div>
                   <div className="small" style={{ fontWeight: 500, marginTop: 6 }}>{chart.isToday ? 'pesagem de hoje' : 'última pesagem'} {dec(chart.todayKg)} kg</div>
+                  {s.rotina && <div className="small" style={{ fontWeight: 600, marginTop: 2, color: 'var(--pri)' }}>meta {dec(s.rotina.pesoMeta)} kg · {Math.abs(chart.trend - s.rotina.pesoMeta) < 0.3 ? 'chegou!' : 'faltam ' + dec(Math.abs(chart.trend - s.rotina.pesoMeta)) + ' kg'}</div>}
                 </div>
               </div>
               <div className="chart">

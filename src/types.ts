@@ -42,6 +42,9 @@ export type Activity = 'sed' | 'leve' | 'mod' | 'alta';
 
 export interface Body {
   sexo: 'M' | 'F';
+  /** birth date, YYYY-MM-DD; when present the age comes from it */
+  nascimento?: string;
+  /** fallback age for profiles created before birth date was asked */
   idade: number;
   altura: number;
   peso: number;
@@ -61,7 +64,8 @@ export type AgentAction =
   | ({ type: 'dieta' } & DietProposal)
   | { type: 'refeicao'; id: string; refeicao: MealId; data?: string; horario?: string; descricao: string; kcal: number; p: number; c: number; g: number; f: number }
   | { type: 'peso'; kg: number; data?: string }
-  | { type: 'agua'; copos: number };
+  | { type: 'agua'; copos: number }
+  | { type: 'anamnese'; itens: Anotacao[] };
 
 export interface ChatMsg {
   from: 'user' | 'agent';
@@ -72,6 +76,33 @@ export interface ChatMsg {
 export interface Weigh {
   date: string;
   kg: number;
+}
+
+export type Objetivo = 'emagrecer' | 'cutting' | 'bulking' | 'recomposicao' | 'manter';
+
+/** One anamnesis answer the agent noted down (sleep, bowel habits, health, …). */
+export interface Anotacao {
+  tema: string;
+  resposta: string;
+}
+
+/** Answers from the questionnaire shown after sign-up. Times are HH:MM. */
+export interface Rotina {
+  objetivo?: Objetivo;
+  pesoMeta: number;
+  treinoDias: number;
+  treinoHorario?: string;
+  acorda: string;
+  /** when the person leaves for work or school, if they do */
+  sai?: string;
+  almoco: string;
+  dorme: string;
+  restricoes: string[];
+  naoGosta: string;
+  /** meal times worked out from the routine */
+  horarios: Record<PlanMealId, string>;
+  /** what the agent learned in its pre-diet conversation, one entry per topic */
+  anamnese?: Anotacao[];
 }
 
 export interface AppState {
@@ -86,4 +117,7 @@ export interface AppState {
   water: Record<string, number>;
   weights: Weigh[];
   msgs: ChatMsg[];
+  rotina: Rotina | null;
+  /** set once the questionnaire was finished */
+  onboardedAt: string | null;
 }

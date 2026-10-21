@@ -37,6 +37,13 @@ export function cleanActions(raw: unknown): AgentAction[] {
         const kg = Math.round(n(r.kg) * 10) / 10;
         return kg > 20 && kg < 400 ? [{ type: 'peso', kg, data: date(r.data) }] : [];
       }
+      case 'anamnese': {
+        const itens = (Array.isArray(r.itens) ? r.itens : []).flatMap(x => {
+          const q = x as Record<string, unknown>;
+          return str(q.tema) && str(q.resposta) ? [{ tema: str(q.tema).slice(0, 60), resposta: str(q.resposta).slice(0, 500) }] : [];
+        });
+        return itens.length ? [{ type: 'anamnese', itens }] : [];
+      }
       case 'agua':
         return [{ type: 'agua', copos: Math.round(n(r.copos, 0, 8)) }];
       default:

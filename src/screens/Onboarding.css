@@ -1,0 +1,21 @@
+.screen.ob { padding-bottom: calc(40px + var(--sab)); gap: 16px; }
+.ob-progress { display: flex; gap: 6px; padding-top: 8px; }
+.ob-progress span { flex: 1; height: 5px; border-radius: 3px; background: var(--track); }
+.ob-progress span.on { background: var(--pri); }
+.ob-head { display: flex; align-items: center; gap: 12px; }
+.ob-sub { margin: -8px 0 0; font: 500 calc(15 * var(--u))/1.5 var(--font); color: var(--ink2); }
+.ob-val { min-width: 84px; text-align: center; font: 700 calc(17 * var(--u)) var(--font); }
+.ob-callout { padding: 14px 16px; border-radius: 18px; background: var(--priSoft); font: 500 calc(14.5 * var(--u))/1.5 var(--font); color: var(--ink); }
+.ob-option { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); text-align: left; }
+.ob-option.on { border-color: var(--pri); background: var(--priSoft); }
+.ob-option .radio { width: 22px; height: 22px; flex: none; border-radius: 11px; border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; }
+.ob-option.on .radio { border-color: var(--pri); }
+.ob-option .radio span { width: 10px; height: 10px; border-radius: 5px; }
+.ob-option.on .radio span { background: var(--pri); }
+.ob-option-t { font: 700 calc(15 * var(--u)) var(--font); }
+.ob-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font: 500 calc(14 * var(--u)) var(--font); }
+.ob-check input { width: 20px; height: 20px; accent-color: var(--pri); }
+.card.ob-times { gap: 10px; }
+.card.ob-times .row-between { font: 500 calc(15 * var(--u)) var(--font); }
+.ob-kcal { font: 800 calc(46 * var(--u))/1 var(--display); letter-spacing: -.02em; }
+.ob-nav { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }

@@ -99,3 +99,31 @@ alter table public.messages add column diet jsonb;
 -- `diet` above is superseded by `actions` (its rows were copied over) and is no longer written.
 alter table public.messages add column actions jsonb;
 update public.messages set actions = jsonb_build_array(diet || '{"type":"dieta"}'::jsonb) where diet is not null;
+
+-- answers from the post-sign-up questionnaire (goal weight, exercise, daily routine, food preferences)
+alter table public.profiles add column onboarding jsonb;
+alter table public.profiles add column onboarded_at timestamptz;
+
+-- sign-up also sends body data (birth date, sex, height, weight); keep it in the profile and
+-- record the weight as the first weigh-in
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  b jsonb := new.raw_user_meta_data -> 'body';
+  kg numeric := nullif(b ->> 'peso', '')::numeric;
+begin
+  insert into public.profiles (user_id, name, body)
+  values (new.id, coalesce(new.raw_user_meta_data ->> 'name', ''), b);
+  if kg > 20 and kg < 400 then
+    -- the app's days are local (Brazil), not UTC
+    insert into public.weights (user_id, day, kg) values (new.id, (now() at time zone 'America/Sao_Paulo')::date, round(kg, 1));
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function public.handle_new_user() from public, anon, authenticated;

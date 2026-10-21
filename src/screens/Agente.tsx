@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import { addEntry, addMsg, addWeight, appStore, applyDiet, setWater, useApp } from '../store/app';
+import { addAnamnese, addEntry, addMsg, addWeight, appStore, applyDiet, setWater, useApp } from '../store/app';
 import { navigate } from '../hooks/useRoute';
+import { session } from '../store/session';
 import { CHIPS } from '../data/agent';
 import { addDays, dateKey, parseKey, rangeShort, today } from '../lib/dates';
-import { autoGoals, goals, planList, sumEntries } from '../lib/nutrition';
+import { goals, goalsAuto, idadeDe, planList, sumEntries } from '../lib/nutrition';
 import { dec, fmt } from '../lib/format';
 import { cleanActions } from '../lib/agentActions';
 import { MEAL_LABEL } from '../data/plan';
@@ -61,10 +62,18 @@ function agentContext(s: AppState) {
     data_hoje: dateKey(t0),
     hora_agora: new Date().toTimeString().slice(0, 5),
     nome: s.profile.name,
-    dados_corporais: s.body,
+    dados_corporais: { ...s.body, idade: idadeDe(s.body) },
+    objetivo: s.rotina ? { tipo: goalsAuto(s).objetivo, peso_meta_kg: s.rotina.pesoMeta, ritmo_kg_semana: s.body.ritmo } : null,
+    anamnese_ja_respondida: s.rotina?.anamnese ?? [],
+    rotina: s.rotina ? {
+      acorda: s.rotina.acorda, sai_de_casa: s.rotina.sai ?? 'trabalha/estuda em casa', almoco: s.rotina.almoco, dorme: s.rotina.dorme,
+      treino: { dias_por_semana: s.rotina.treinoDias, horario: s.rotina.treinoHorario ?? null },
+      horarios_das_refeicoes: s.rotina.horarios
+    } : null,
+    preferencias: s.rotina ? { restricoes: s.rotina.restricoes, nao_gosta: s.rotina.naoGosta } : null,
     origem_das_metas: s.planMode === 'nutro' ? 'dieta cadastrada' : 'calculadas pelo app (sem dieta)',
     metas_diarias: goals(s),
-    calculo_automatico: autoGoals(s.body),
+    calculo_automatico: goalsAuto(s),
     plano_atual: s.planMode === 'nutro' ? s.dietMeals : planList(s),
     hoje: day(0),
     agua_hoje_copos: s.water[dateKey(t0)] ?? 0,
@@ -117,7 +126,7 @@ function DietCard({ d }: { d: DietProposal }) {
 }
 
 /** Confirm card for a meal, weigh-in or water total the agent proposed. Applying is idempotent. */
-function ActionCard({ a }: { a: Exclude<AgentAction, { type: 'dieta' }> }) {
+function ActionCard({ a }: { a: Exclude<AgentAction, { type: 'dieta' | 'anamnese' }> }) {
   const s = useApp();
   const day = ('data' in a && a.data) || dateKey(today());
   const dayLabel = day === dateKey(today()) ? 'hoje' : parseKey(day).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
@@ -191,6 +200,8 @@ export function Agente() {
       }
       if (!data?.text) throw new Error('');
       const actions = cleanActions(data.actions);
+      // anamnesis notes are the user's own answers: keep them on the profile right away
+      actions.forEach(a => { if (a.type === 'anamnese') addAnamnese(a.itens); });
       addMsg({ from: 'agent', text: data.text, actions: actions.length ? actions : undefined });
     } catch (e) {
       setFailure(ERRORS[(e as Error).message] ?? 'Não consegui responder agora. Verifique a conexão e tente de novo.');
@@ -205,6 +216,12 @@ export function Agente() {
     setInput('');
     ask();
   };
+
+  // a question queued by another screen (e.g. the end of the questionnaire) is sent on arrival
+  useEffect(() => {
+    const q = session.get().agentPrompt;
+    if (q) { session.set(x => ({ ...x, agentPrompt: null })); send(q); }
+  }, []);
 
   const t0 = today();
   const name = s.profile.name;
@@ -239,7 +256,11 @@ export function Agente() {
         {s.msgs.map((m, i) => (
           <div key={i} className="col" style={{ gap: 12 }}>
             <div className={'bubble ' + m.from}>{m.text}</div>
-            {m.actions?.map((a, j) => (a.type === 'dieta' ? <DietCard key={j} d={a} /> : <ActionCard key={j} a={a} />))}
+            {m.actions?.map((a, j) => (
+              a.type === 'dieta' ? <DietCard key={j} d={a} />
+                : a.type === 'anamnese' ? <div key={j} className="noted">Anotado no seu perfil: {a.itens.map(i => i.tema.toLowerCase()).join(', ')}</div>
+                : <ActionCard key={j} a={a} />
+            ))}
           </div>
         ))}
         {typing && <div className="bubble agent typing" aria-label="Agente pensando"><span /><span /><span /></div>}

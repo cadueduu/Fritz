@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRoute } from './hooks/useRoute';
 import { session as sessionStore, useSession } from './store/session';
-import { loadUserData, resetUserData } from './store/app';
+import { loadUserData, resetUserData, useApp } from './store/app';
 import { supabase } from './lib/supabase';
 import { AgentMark } from './components/AgentMark';
 import { Login } from './screens/Login';
@@ -12,6 +12,7 @@ import { Diario } from './screens/Diario';
 import { Progresso } from './screens/Progresso';
 import { Agente } from './screens/Agente';
 import { Plano } from './screens/Plano';
+import { Onboarding } from './screens/Onboarding';
 
 type Auth = { state: 'checking' | 'out' | 'loading' | 'ready' } | { state: 'error'; userId: string; email: string };
 
@@ -47,7 +48,8 @@ function useAuth() {
 
 export function App() {
   const route = useRoute();
-  const { draft, syncError } = useSession();
+  const { draft, syncError, redoOnboarding } = useSession();
+  const { onboardedAt } = useApp();
   const [auth, retry] = useAuth();
   useEffect(() => { document.querySelector('.screen')?.scrollTo(0, 0); }, [route]);
   useEffect(() => {
@@ -71,6 +73,15 @@ export function App() {
             ) : <span>Carregando…</span>}
           </div>
         )}
+      </main>
+    );
+  }
+
+  if (!onboardedAt || redoOnboarding) {
+    return (
+      <main className="app">
+        <Onboarding />
+        {syncError && <div className="toast top" role="alert" style={{ zIndex: 45 }}>{syncError}</div>}
       </main>
     );
   }

@@ -20,9 +20,13 @@ interface Session {
   draft: Draft | null;
   hojeToast: string | null;
   syncError: string | null;
+  /** question to send to the agent as soon as its screen opens */
+  agentPrompt: string | null;
+  /** reopens the questionnaire from Meu plano */
+  redoOnboarding: boolean;
 }
 
-export const session = createStore<Session>({ regMeal: mealForNow(), draft: null, hojeToast: null, syncError: null });
+export const session = createStore<Session>({ regMeal: mealForNow(), draft: null, hojeToast: null, syncError: null, agentPrompt: null, redoOnboarding: false });
 export const useSession = session.use;
 
 let draftId = 0;

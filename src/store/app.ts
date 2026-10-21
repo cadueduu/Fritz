@@ -1,5 +1,5 @@
 // App data, loaded from Supabase after sign-in. Actions update the screen immediately and save in the background.
-import type { AgentAction, AppState, Body, ChatMsg, DietMeal, DietProposal, Entry, Macros, MealId } from '../types';
+import type { AgentAction, Anotacao, AppState, Body, ChatMsg, DietMeal, DietProposal, Entry, Macros, MealId, Objetivo, Rotina } from '../types';
 import { DEFAULT_GOALS, DIET } from '../data/plan';
 import { supabase } from '../lib/supabase';
 import { createStore } from './createStore';
@@ -17,7 +17,9 @@ const empty = (): AppState => ({
   diaries: {},
   water: {},
   weights: [],
-  msgs: []
+  msgs: [],
+  rotina: null,
+  onboardedAt: null
 });
 
 export const appStore = createStore<AppState>(empty());
@@ -76,6 +78,8 @@ export async function loadUserData(userId: string, email = '') {
     if (p.diet_goals) s.dietGoals = { ...DEFAULT_GOALS, ...(p.diet_goals as Macros) };
     if (p.diet_meals) s.dietMeals = p.diet_meals as DietMeal[];
     if (p.body) s.body = { ...DEFAULT_BODY, ...(p.body as Body) };
+    s.rotina = (p.onboarding as Rotina | null) ?? null;
+    s.onboardedAt = p.onboarded_at ?? null;
   } else {
     // the profile is created by a database trigger on sign-up; recreate it if it is missing
     save(supabase.from('profiles').insert({ user_id: userId }));
@@ -104,7 +108,7 @@ const saveProfile = () => {
     if (!profileUser) return;
     const s = appStore.get();
     save(supabase.from('profiles').update({
-      plan_mode: s.planMode, diet_goals: s.dietGoals, diet_meals: s.dietMeals, body: s.body, updated_at: new Date().toISOString()
+      plan_mode: s.planMode, diet_goals: s.dietGoals, diet_meals: s.dietMeals, body: s.body, onboarding: s.rotina, updated_at: new Date().toISOString()
     }).eq('user_id', profileUser));
   }, 500);
 };
@@ -140,6 +144,47 @@ export const setPlanMode = (planMode: AppState['planMode']) => { set(s => ({ ...
 export const setDietGoal = (k: keyof Macros, v: number) => { set(s => ({ ...s, dietGoals: { ...s.dietGoals, [k]: v } })); saveProfile(); };
 
 export const setBody = <K extends keyof Body>(k: K, v: Body[K]) => { set(s => ({ ...s, body: { ...s.body, [k]: v } })); saveProfile(); };
+
+export const setObjetivo = (objetivo: Objetivo) => {
+  set(s => (s.rotina ? { ...s, rotina: { ...s.rotina, objetivo } } : s));
+  saveProfile();
+};
+
+/** Notes from the agent's anamnesis; a newer answer on the same topic replaces the older one. */
+export const addAnamnese = (itens: Anotacao[]) => {
+  set(s => {
+    if (!s.rotina) return s;
+    const key = (t: string) => t.trim().toLowerCase();
+    const kept = (s.rotina.anamnese ?? []).filter(a => !itens.some(i => key(i.tema) === key(a.tema)));
+    return { ...s, rotina: { ...s.rotina, anamnese: [...kept, ...itens] } };
+  });
+  saveProfile();
+};
+
+export const setPesoMeta = (kg: number) => {
+  set(s => (s.rotina ? { ...s, rotina: { ...s.rotina, pesoMeta: kg } } : s));
+  saveProfile();
+};
+
+/** Saves the questionnaire: body data, routine, and meal times on the diet template too. */
+export const finishOnboarding = (body: Body, rotina: Rotina, today: string) => {
+  const onboardedAt = new Date().toISOString();
+  set(s => ({
+    ...s,
+    body,
+    rotina,
+    onboardedAt,
+    dietMeals: s.dietMeals.map(m => ({ ...m, time: rotina.horarios[m.id] ?? m.time }))
+  }));
+  const s = appStore.get();
+  if (profileUser) {
+    save(supabase.from('profiles').update({
+      body, onboarding: rotina, onboarded_at: onboardedAt, diet_meals: s.dietMeals, plan_mode: s.planMode, updated_at: onboardedAt
+    }).eq('user_id', profileUser));
+  }
+  // the weight typed here is today's weigh-in unless one was already logged
+  if (!s.weights.some(w => w.date === today)) addWeight(today, body.peso);
+};
 
 export const addMsg = (m: ChatMsg) => {
   set(s => ({ ...s, msgs: [...s.msgs, m] }));

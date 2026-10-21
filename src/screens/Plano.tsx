@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
 import type { Activity, Body, Macros } from '../types';
-import { setBody, setDietGoal, setPlanMode, useApp } from '../store/app';
+import { setBody, setDietGoal, setObjetivo, setPesoMeta, setPlanMode, useApp } from '../store/app';
+import { session } from '../store/session';
 import { navigate } from '../hooks/useRoute';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../hooks/useToast';
-import { autoGoals, autoPlan, autoSug } from '../lib/nutrition';
+import { OBJETIVOS, autoPlan, autoSug, goalsAuto, idadeDe } from '../lib/nutrition';
 import { dec, fmt } from '../lib/format';
 import { MacroTiles } from '../components/MacroTiles';
 import { TabBar } from '../components/TabBar';
@@ -13,8 +14,8 @@ import './Plano.css';
 const GOAL_FIELDS: [keyof Macros, string, string, string][] = [
   ['kcal', 'Calorias', 'kcal', 'var(--pri)'], ['p', 'Proteína', 'g', 'var(--mP)'], ['c', 'Carboidrato', 'g', 'var(--mC)'], ['g', 'Gordura', 'g', 'var(--mG)'], ['f', 'Fibra', 'g', 'var(--mF)']
 ];
-const BODY_FIELDS: [keyof Pick<Body, 'idade' | 'altura' | 'peso'>, string, number, string, number, number][] = [
-  ['idade', 'Idade', 1, ' anos', 14, 99], ['altura', 'Altura', 1, ' cm', 130, 220], ['peso', 'Peso', 0.5, ' kg', 40, 250]
+const BODY_FIELDS: [keyof Pick<Body, 'altura' | 'peso'>, string, number, string, number, number][] = [
+  ['altura', 'Altura', 1, ' cm', 130, 220], ['peso', 'Peso', 0.5, ' kg', 40, 250]
 ];
 const ACTIVITY: [Activity, string][] = [['sed', 'Sedentário'], ['leve', 'Leve'], ['mod', 'Moderada'], ['alta', 'Alta']];
 
@@ -37,7 +38,7 @@ export function Plano() {
   const [importing, setImporting] = useState(false);
   const [toast, showToast] = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
-  const ag = autoGoals(s.body);
+  const ag = goalsAuto(s);
   const b = s.body;
 
   const onImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,6 +144,10 @@ export function Plano() {
                 <button className={b.sexo === 'M' ? 'on' : ''} style={{ height: 40 }} onClick={() => setBody('sexo', 'M')}>Masculino</button>
                 <button className={b.sexo === 'F' ? 'on' : ''} style={{ height: 40 }} onClick={() => setBody('sexo', 'F')}>Feminino</button>
               </div>
+              <label className="row">
+                <span className="grow" style={{ font: '600 calc(15 * var(--u)) var(--font)' }}>Nascimento <span className="muted" style={{ fontWeight: 500 }}>· {idadeDe(b)} anos</span></span>
+                <input className="date-in" type="date" value={b.nascimento ?? ''} max={new Date().toISOString().slice(0, 10)} onChange={e => e.target.value && setBody('nascimento', e.target.value)} />
+              </label>
               {BODY_FIELDS.map(([k, label, st, unit, mn, mx]) => (
                 <div key={k} className="row">
                   <span className="grow" style={{ font: '600 calc(15 * var(--u)) var(--font)' }}>{label}</span>
@@ -153,20 +158,34 @@ export function Plano() {
               ))}
               <span className="label" style={{ marginTop: 4 }}>Nível de atividade</span>
               <div className="chips">{ACTIVITY.map(([id, label]) => <button key={id} className={'chip' + (b.atividade === id ? ' on' : '')} aria-pressed={b.atividade === id} onClick={() => setBody('atividade', id)}>{label}</button>)}</div>
-              <span className="label" style={{ marginTop: 4 }}>Ritmo de perda</span>
-              <div className="chips">{[0.25, 0.5, 0.75].map(r => <button key={r} className={'chip' + (b.ritmo === r ? ' on' : '')} aria-pressed={b.ritmo === r} onClick={() => setBody('ritmo', r)}>{dec(r, 2).replace(/0$/, '')} kg/semana</button>)}</div>
+              {s.rotina && (
+                <>
+                  <span className="label" style={{ marginTop: 4 }}>Objetivo</span>
+                  <div className="chips">{OBJETIVOS.map(([id, label]) => <button key={id} className={'chip' + (ag.objetivo === id ? ' on' : '')} aria-pressed={ag.objetivo === id} onClick={() => setObjetivo(id)}>{label}</button>)}</div>
+                </>
+              )}
+              {s.rotina && ag.objetivo !== 'manter' && (
+                <div className="row">
+                  <span className="grow" style={{ font: '600 calc(15 * var(--u)) var(--font)' }}>Peso desejado</span>
+                  <button className="step" aria-label="Diminuir peso desejado" onClick={() => setPesoMeta(Math.max(35, s.rotina!.pesoMeta - 0.5))}>−</button>
+                  <span className="body-val num">{dec(s.rotina.pesoMeta)} kg</span>
+                  <button className="step" aria-label="Aumentar peso desejado" onClick={() => setPesoMeta(Math.min(300, s.rotina!.pesoMeta + 0.5))}>+</button>
+                </div>
+              )}
+              {(ag.objetivo === 'emagrecer' || ag.objetivo === 'cutting') && <span className="label" style={{ marginTop: 4 }}>Ritmo de perda</span>}
+              {(ag.objetivo === 'emagrecer' || ag.objetivo === 'cutting') && <div className="chips">{[0.25, 0.5, 0.75].map(r => <button key={r} className={'chip' + (b.ritmo === r ? ' on' : '')} aria-pressed={b.ritmo === r} onClick={() => setBody('ritmo', r)}>{dec(r, 2).replace(/0$/, '')} kg/semana</button>)}</div>}
             </section>
 
             <section className="card">
               <span className="label">Sua meta diária calculada</span>
               <div className="row" style={{ alignItems: 'baseline', gap: 6 }}><span className="calc-num num">{fmt(ag.kcal)}</span><span className="muted" style={{ font: '600 calc(15 * var(--u)) var(--font)' }}>kcal</span></div>
-              <span className="muted" style={{ font: '500 calc(13 * var(--u))/1.45 var(--font)' }}>Gasto estimado {fmt(ag.tdee)} kcal − déficit {fmt(ag.def)} kcal</span>
+              <span className="muted" style={{ font: '500 calc(13 * var(--u))/1.45 var(--font)' }}>Gasto estimado {fmt(ag.tdee)} kcal{ag.def > 0 ? ` − déficit ${fmt(ag.def)} kcal` : ag.def < 0 ? ` + ${fmt(-ag.def)} kcal para ganhar peso` : ' · manutenção'}</span>
               {ag.floored && <span className="warn-box" style={{ borderRadius: 12 }}>Ajustamos para o mínimo seguro. Para perder mais rápido, converse com um profissional.</span>}
               <MacroTiles m={ag} small />
             </section>
 
             <div className="row-between" style={{ marginTop: 4 }}><span className="h-sec">O que comer hoje</span><span className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>recalcula com seus dados</span></div>
-            {autoPlan(ag.kcal).map(m => (
+            {autoPlan(ag.kcal, s.rotina).map(m => (
               <div key={m.id} className="card r20 auto-meal">
                 <span className="diet-time" style={{ paddingTop: 2 }}>{m.time}</span>
                 <span className="grow col" style={{ gap: 4 }}>
@@ -179,6 +198,8 @@ export function Plano() {
             <button className="btn txt" style={{ height: 44, color: 'var(--pri)', fontSize: 'calc(14 * var(--u))' }} onClick={() => setPlanMode('nutro')}>Recebi uma dieta · cadastrar agora</button>
           </>
         )}
+
+        <button className="btn sec" style={{ background: 'var(--card)', fontSize: 'calc(14 * var(--u))', marginTop: 10 }} onClick={() => session.set(x => ({ ...x, redoOnboarding: true }))}>Refazer questionário (objetivo, exercícios e horários)</button>
 
         <section className="card account">
           <div className="grow col" style={{ gap: 2 }}>

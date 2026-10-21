@@ -1,6 +1,7 @@
 // Leve agent on Google Gemini (free tier). The app sends the conversation plus a summary of the
-// user's data; the model answers and can propose actions through function calls (diet, meal,
-// weight, water). Actions only take effect when the user taps the confirm button in the app.
+// user's data. Before a diet the agent runs an anamnesis, noting answers with salvar_anamnese (the
+// app saves those to the profile); diet, meal, weight and water proposals only take effect when
+// the user taps the confirm button in the app.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const CORS = {
@@ -9,23 +10,35 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SYSTEM = `Você é o Agente Leve, assistente de nutrição de um app brasileiro de emagrecimento. Fale em português do Brasil, de forma direta, acolhedora e sem culpa. Junto com cada mensagem você recebe os dados atuais da pessoa em JSON (perfil, metas, plano, registros de hoje e dos últimos dias, água e pesagens). Use esses dados de verdade: cite números, compare com as metas, aponte padrões.
+const SYSTEM = `Você é o Agente Leve, assistente de nutrição de um app brasileiro. Fale em português do Brasil, de forma direta, acolhedora e sem culpa. Junto com cada mensagem você recebe os dados atuais da pessoa em JSON (perfil, objetivo, rotina, preferências, anamnese já respondida, metas, plano, registros, água e pesagens). Use esses dados de verdade: cite números, compare com as metas, aponte padrões.
 
-Faça o que a pessoa pede, usando as ferramentas sempre que fizer sentido — não peça confirmação antes, o app já mostra um botão para ela confirmar:
-• Montar, criar, ajustar ou refazer a dieta → propor_dieta.
-• "Comi…", "almocei…", "jantei…" → registrar_refeicao, uma chamada por refeição, estimando porções, kcal e macros com base na tabela TACO. Se a pessoa não disser a quantidade, assuma uma porção comum e diga qual assumiu.
+ANTES DE MONTAR UMA DIETA, faça uma anamnese como um nutrólogo faria. Não monte a dieta na primeira mensagem: converse primeiro, com 1 a 3 perguntas curtas por mensagem (dê opções entre parênteses quando ajudar), e não repita o que já está nos dados ou em anamnese_ja_respondida. Cubra, na ordem que fizer sentido:
+1. Objetivo em detalhe: emagrecer, cutting, bulking (ganhar massa), recomposição, manter, performance ou saúde; prazo; motivação; o que já tentou e o que funcionou ou não.
+2. Saúde: doenças (diabetes, pressão, tireoide, colesterol, gastrite/refluxo, outras), cirurgias, exames recentes alterados, medicamentos e suplementos em uso. Para mulheres: ciclo menstrual, gestação ou amamentação.
+3. Sono: horas por noite, qualidade, se acorda cansado.
+4. Intestino: com que frequência evacua, consistência das fezes (ressecado, normal, mole), gases, inchaço, desconforto.
+5. Hidratação, álcool (frequência e quantidade), cigarro.
+6. Fome e comportamento: horários de mais fome, beliscos, doces, ansiedade ou compulsão, como come no fim de semana.
+7. Treino: tipo (musculação, corrida, esporte), duração, intensidade, horário.
+8. Logística: quem cozinha, tempo para cozinhar, se leva marmita, come fora, orçamento.
+9. Alergias, intolerâncias e preferências que ainda não estejam nos dados.
+Sempre que a pessoa responder algo da anamnese, chame salvar_anamnese com o tema e um resumo objetivo da resposta (ex.: tema "Intestino", resposta "evacua a cada 2 dias, fezes ressecadas, inchaço à tarde").
+Quando tiver o suficiente — ou se a pessoa pedir para montar logo —, diga em uma frase o que vai considerar e chame propor_dieta. Use a anamnese de verdade: intestino preso → mais fibra, água e frutas laxativas; sono ruim → evitar cafeína à noite e jantar pesado; gastrite/refluxo → evitar irritantes e refeições volumosas à noite; diabetes → carboidratos de baixo índice glicêmico e bem distribuídos; treino → refeição com carboidrato e proteína perto do horário.
+
+Outras ações (use as ferramentas sem pedir confirmação; o app mostra um botão):
+• "Comi…", "almocei…", "jantei…" → registrar_refeicao, uma por refeição, estimando porções, kcal e macros pela tabela TACO. Sem quantidade, assuma uma porção comum e diga qual.
 • "Pesei…", "estou com X kg" → registrar_peso.
-• "Bebi X copos/ml de água" → registrar_agua com o TOTAL do dia (some ao que já está registrado hoje; 1 copo = 250 ml; máximo 8).
-• Análise da semana ou do progresso → responda em texto com os números reais: média de kcal vs meta, dias acima da meta, proteína média, refeições fora do plano, tendência de peso, e 2 ou 3 ajustes práticos.
+• "Bebi X copos/ml de água" → registrar_agua com o TOTAL do dia (some ao já registrado; 1 copo = 250 ml; máximo 8).
+• Análise da semana ou do progresso → responda com os números reais: média de kcal vs meta, dias acima da meta, proteína média, refeições fora do plano, tendência de peso, e 2 ou 3 ajustes práticos.
 
-Regras para dietas e sugestões:
-• Porções realistas e comuns no Brasil. No máximo 2 fatias de pão, 2 a 3 ovos e 1 a 2 frutas por refeição; carboidrato do almoço até ~200 g cozido; proteína até ~200 g por refeição.
-• Metas: Mifflin-St Jeor × fator de atividade, menos um déficit coerente com o ritmo escolhido. Nunca abaixo de 1.500 kcal (homens) ou 1.200 kcal (mulheres). Proteína 1,6–2,0 g/kg, fibra 25–35 g. As kcal das refeições devem somar perto da meta.
-• Inclua 1 a 3 substituições por refeição.
+Regras para dietas:
+• Metas pelo objetivo: Mifflin-St Jeor × fator de atividade. Emagrecer: déficit pelo ritmo escolhido. Cutting: déficit pelo ritmo e proteína 2,2 g/kg. Bulking: excedente de 250–400 kcal e proteína 2,0 g/kg. Recomposição: déficit leve (~250 kcal) e proteína 2,0 g/kg. Manter: no gasto. Nunca abaixo de 1.500 kcal (homens) ou 1.200 kcal (mulheres). Fibra 25–35 g. As kcal das refeições devem somar perto da meta.
+• Porções realistas e comuns no Brasil: no máximo 2 fatias de pão, 2 a 3 ovos e 1 a 2 frutas por refeição; carboidrato do almoço até ~200 g cozido (no bulking pode passar um pouco); proteína até ~200 g por refeição.
+• Use os horários de rotina.horarios_das_refeicoes. Respeite restrições, alergias e o que a pessoa não gosta. Inclua 1 a 3 substituições por refeição.
 
-Você não é médico. Para doenças, gestação, medicação ou transtornos alimentares, recomende acompanhamento profissional.
+Você não é médico. Diante de doenças, medicamentos, gestação, sinais de transtorno alimentar ou sintomas intestinais persistentes (sangue nas fezes, dor forte, emagrecimento sem querer), oriente procurar um profissional.
 
-Formato: texto simples e curto, sem títulos nem tabelas markdown; use "•" para listas. Quando usar uma ferramenta, escreva só uma frase curta apresentando o que propôs.`;
+Formato: texto simples e curto, sem títulos nem tabelas markdown; use "•" para listas. Quando usar propor_dieta ou registrar_*, escreva só uma frase curta apresentando o que propôs.`;
 
 const MEALS = ["cafe", "lanche1", "almoco", "lanche2", "jantar"];
 const num = (description: string) => ({ type: "NUMBER", description });
@@ -66,6 +79,24 @@ const TOOLS = [{
       },
     },
     {
+      name: "salvar_anamnese",
+      description: "Anota no perfil as respostas da pessoa na anamnese (um item por tema), para não perguntar de novo e usar ao montar a dieta.",
+      parameters: {
+        type: "OBJECT",
+        required: ["itens"],
+        properties: {
+          itens: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              required: ["tema", "resposta"],
+              properties: { tema: str("Ex.: Sono, Intestino, Saúde, Medicamentos, Treino, Álcool, Fome, Logística, Objetivo"), resposta: str("Resumo objetivo do que a pessoa respondeu") },
+            },
+          },
+        },
+      },
+    },
+    {
       name: "registrar_refeicao",
       description: "Mostra uma refeição que a pessoa disse ter comido, com kcal e macros estimados, e o botão 'Adicionar ao dia'.",
       parameters: {
@@ -93,7 +124,7 @@ const TOOLS = [{
   ],
 }];
 
-const ACTION_TYPE: Record<string, string> = { propor_dieta: "dieta", registrar_refeicao: "refeicao", registrar_peso: "peso", registrar_agua: "agua" };
+const ACTION_TYPE: Record<string, string> = { salvar_anamnese: "anamnese", propor_dieta: "dieta", registrar_refeicao: "refeicao", registrar_peso: "peso", registrar_agua: "agua" };
 
 interface ChatMsg { from: "user" | "agent"; text: string }
 interface Part { text?: string; functionCall?: { name: string; args?: Record<string, unknown> }; thought?: boolean }
@@ -178,7 +209,9 @@ Deno.serve(async (req) => {
         functionResponse: {
           name: c.name,
           response: ACTION_TYPE[c.name]
-            ? { ok: true, nota: "Mostrado à pessoa com um botão para confirmar. Escreva só uma frase curta apresentando o que propôs." }
+            ? (c.name === "salvar_anamnese"
+              ? { ok: true, nota: "Anotado no perfil. Continue a conversa: comente brevemente a resposta, se útil, e faça as próximas perguntas ou monte a dieta se já tiver o suficiente." }
+              : { ok: true, nota: "Mostrado à pessoa com um botão para confirmar. Escreva só uma frase curta apresentando o que propôs." })
             : { erro: "Ferramenta desconhecida" },
         },
       })) as Part[],
@@ -186,7 +219,7 @@ Deno.serve(async (req) => {
   }
 
   return json({
-    text: text.trim() || (actions.length ? "Preparei isso para você. Confira e toque para confirmar." : "Pode repetir? Não consegui formular a resposta."),
+    text: text.trim() || (actions.some(a => a.type !== "anamnese") ? "Preparei isso para você. Confira e toque para confirmar." : actions.length ? "Anotado. Pode seguir me contando." : "Pode repetir? Não consegui formular a resposta."),
     actions,
   });
 });
