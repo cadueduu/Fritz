@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import { addMsg, appStore, applyDiet, useApp } from '../store/app';
+import { addEntry, addMsg, addWeight, appStore, applyDiet, setWater, useApp } from '../store/app';
 import { navigate } from '../hooks/useRoute';
 import { CHIPS } from '../data/agent';
 import { addDays, dateKey, parseKey, rangeShort, today } from '../lib/dates';
 import { autoGoals, goals, planList, sumEntries } from '../lib/nutrition';
 import { dec, fmt } from '../lib/format';
+import { cleanActions } from '../lib/agentActions';
+import { MEAL_LABEL } from '../data/plan';
 import { supabase } from '../lib/supabase';
-import type { AppState, DietProposal } from '../types';
+import type { AgentAction, AppState, DietProposal } from '../types';
 import { AgentMark } from '../components/AgentMark';
 import { TabBar } from '../components/TabBar';
 import './Agente.css';
@@ -65,15 +67,18 @@ function agentContext(s: AppState) {
     calculo_automatico: autoGoals(s.body),
     plano_atual: s.planMode === 'nutro' ? s.dietMeals : planList(s),
     hoje: day(0),
+    agua_hoje_copos: s.water[dateKey(t0)] ?? 0,
     ultimos_7_dias: Array.from({ length: 7 }, (_, i) => day(i - 7)).filter(d => d.refeicoes.length),
-    pesagens_recentes: s.weights.slice(-10)
+    // older days as daily totals only, to keep the request small
+    dias_8_a_28: Array.from({ length: 21 }, (_, i) => day(i - 28)).filter(d => d.refeicoes.length).map(({ refeicoes, ...t }) => ({ ...t, n_registros: refeicoes.length })),
+    pesagens_recentes: s.weights.slice(-30)
   };
 }
 
 const ERRORS: Record<string, string> = {
-  missing_key: 'O agente ainda não está configurado: falta a chave da API da Anthropic no Supabase.',
-  bad_key: 'A chave da API da Anthropic configurada no Supabase não é válida.',
-  rate_limited: 'Muitas perguntas em pouco tempo. Espere alguns segundos e tente de novo.'
+  missing_key: 'O agente ainda não está configurado: falta a chave do Gemini (GEMINI_API_KEY) no Supabase.',
+  bad_key: 'A chave do Gemini configurada no Supabase não é válida ou o modelo não está disponível.',
+  rate_limited: 'O limite gratuito do Gemini foi atingido por agora. Espere um minuto e tente de novo.'
 };
 
 function DietCard({ d }: { d: DietProposal }) {
@@ -110,6 +115,49 @@ function DietCard({ d }: { d: DietProposal }) {
   );
 }
 
+/** Confirm card for a meal, weigh-in or water total the agent proposed. Applying is idempotent. */
+function ActionCard({ a }: { a: Exclude<AgentAction, { type: 'dieta' }> }) {
+  const s = useApp();
+  const day = ('data' in a && a.data) || dateKey(today());
+  const dayLabel = day === dateKey(today()) ? 'hoje' : parseKey(day).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+  let title: string, sub: string, label: string, done: boolean, apply: () => void;
+  if (a.type === 'refeicao') {
+    const plan = planList(s).find(p => p.id === a.refeicao);
+    const name = a.refeicao === 'extra' ? 'Extra' : plan?.name ?? MEAL_LABEL[a.refeicao];
+    title = `${name} · ${fmt(a.kcal)} kcal`;
+    sub = `${a.descricao} · P ${fmt(a.p)} · C ${fmt(a.c)} · G ${fmt(a.g)} · F ${fmt(a.f)} g · ${dayLabel}`;
+    label = 'Adicionar ao dia';
+    done = (s.diaries[day] || []).some(e => e.id === a.id);
+    apply = () => addEntry(day, {
+      id: a.id, time: a.horario ?? new Date().toTimeString().slice(0, 5), meal: a.refeicao, title: name, desc: a.descricao,
+      kcal: a.kcal, p: a.p, c: a.c, g: a.g, f: a.f, fora: a.refeicao === 'extra', photo: false, mult: 1
+    });
+  } else if (a.type === 'peso') {
+    title = `Pesagem · ${dec(a.kg)} kg`;
+    sub = 'Entra no gráfico de Progresso · ' + dayLabel;
+    label = 'Salvar pesagem';
+    done = s.weights.some(w => w.date === day && w.kg === a.kg);
+    apply = () => addWeight(day, a.kg);
+  } else {
+    title = `Água · ${dec(a.copos * 0.25, 2).replace(/,?0+$/, '')} L hoje`;
+    sub = `${a.copos} de 8 copos de 250 ml`;
+    label = 'Atualizar água';
+    done = (s.water[dateKey(today())] ?? 0) === a.copos;
+    apply = () => setWater(dateKey(today()), a.copos);
+  }
+  return (
+    <section className="card action-card">
+      <div className="col" style={{ gap: 3 }}>
+        <span style={{ font: '700 calc(15 * var(--u)) var(--font)' }}>{title}</span>
+        <span className="muted" style={{ font: '500 calc(13 * var(--u))/1.4 var(--font)' }}>{sub}</span>
+      </div>
+      {done
+        ? <span className="badge ok" style={{ alignSelf: 'flex-start' }}>Registrado ✓</span>
+        : <button className="btn pri h44" style={{ alignSelf: 'flex-start' }} onClick={apply}>{label}</button>}
+    </section>
+  );
+}
+
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
 
 export function Agente() {
@@ -132,7 +180,7 @@ export function Agente() {
     setTyping(true);
     const st = appStore.get();
     try {
-      const { data, error } = await supabase.functions.invoke<{ text: string; diet?: DietProposal | null }>('agente', {
+      const { data, error } = await supabase.functions.invoke<{ text: string; actions?: unknown }>('agente', {
         body: { messages: st.msgs.slice(-20).map(m => ({ from: m.from, text: m.text })), context: agentContext(st) }
       });
       if (error) {
@@ -141,7 +189,8 @@ export function Agente() {
         throw new Error(code);
       }
       if (!data?.text) throw new Error('');
-      addMsg({ from: 'agent', text: data.text, diet: data.diet ?? undefined });
+      const actions = cleanActions(data.actions);
+      addMsg({ from: 'agent', text: data.text, actions: actions.length ? actions : undefined });
     } catch (e) {
       setFailure(ERRORS[(e as Error).message] ?? 'Não consegui responder agora. Verifique a conexão e tente de novo.');
     } finally {
@@ -189,7 +238,7 @@ export function Agente() {
         {s.msgs.map((m, i) => (
           <div key={i} className="col" style={{ gap: 12 }}>
             <div className={'bubble ' + m.from}>{m.text}</div>
-            {m.diet && <DietCard d={m.diet} />}
+            {m.actions?.map((a, j) => (a.type === 'dieta' ? <DietCard key={j} d={a} /> : <ActionCard key={j} a={a} />))}
           </div>
         ))}
         {typing && <div className="bubble agent typing" aria-label="Agente pensando"><span /><span /><span /></div>}

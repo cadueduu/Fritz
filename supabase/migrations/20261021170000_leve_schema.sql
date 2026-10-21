@@ -94,3 +94,8 @@ revoke execute on function public.handle_new_user() from public, anon, authentic
 
 -- diet proposed by the agent in that message, applied only when the user taps "Usar esta dieta"
 alter table public.messages add column diet jsonb;
+
+-- actions the agent proposed in a message (diet, meal, weight, water); each needs the user's tap to apply.
+-- `diet` above is superseded by `actions` (its rows were copied over) and is no longer written.
+alter table public.messages add column actions jsonb;
+update public.messages set actions = jsonb_build_array(diet || '{"type":"dieta"}'::jsonb) where diet is not null;

@@ -2,7 +2,7 @@
 export const CHIPS = [
   'Monte minha dieta com meus dados',
   'O que comer no jantar hoje?',
-  'Como está minha semana?',
   'Estourei hoje, e agora?',
-  'Posso trocar o arroz por batata?'
+  'Comi 2 ovos e 1 pão francês no café',
+  'Analise minha semana'
 ];

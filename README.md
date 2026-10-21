@@ -9,7 +9,7 @@ App (PWA, mobile-first) de acompanhamento de emagrecimento, em português do Bra
 - **Análise da foto** — skeleton de carregamento, alimentos com porção editável (slider/campo), confiança, "Corrigir", perguntas rápidas e comparação com o plano. Só soma no dia depois de "Comi isso".
 - **Diário** — linha do tempo por dia, faixa da semana, visão semanal, editar porção e excluir com "Desfazer".
 - **Progresso** — peso com média móvel de 7 dias, nova pesagem, medidas, fotos, calorias vs meta, aderência e consistência.
-- **Agente** — chat com Claude (Opus 5.5) que conhece seu perfil, metas e registros. Monta a dieta quando você pede (cartão com "Usar esta dieta") e mostra o resumo semanal.
+- **Agente** — chat com IA (Gemini, gratuito) que conhece seu perfil, metas e registros: monta a dieta, registra refeições, peso e água (sempre com um toque para confirmar) e analisa a semana.
 - **Meu plano** — "Tenho dieta" (metas e refeições do nutrólogo) ou "Não tenho dieta" (metas calculadas por Mifflin-St Jeor + déficit, com mínimo seguro).
 
 Tema claro/escuro segue o sistema. Tamanhos de texto em `rem` para respeitar o tamanho de fonte do usuário (Dynamic Type no iOS).
@@ -54,8 +54,15 @@ git add leve_build && git commit -m "Atualiza build"
 
 Dentro do Streamlit o app não registra o service worker (não funciona offline nem é instalável); para isso, use o GitHub Pages.
 
-## Agente (Supabase Edge Function)
+## Agente (Supabase Edge Function + Gemini)
 
-`supabase/functions/agente` chama a API da Anthropic (Claude Opus 5.5). O app manda a conversa e um resumo dos seus dados; quando você pede uma dieta, o agente usa a ferramenta `propor_dieta` e o app mostra o cartão com "Usar esta dieta". Nada muda no plano sem esse toque.
+`supabase/functions/agente` usa o **Google Gemini** pelo plano gratuito. O app manda a conversa e um resumo dos seus dados (perfil, metas, plano, registros de 28 dias, água, pesagens). O agente responde e pode propor ações, cada uma com um botão de confirmar:
 
-A chave fica só no Supabase: **Edge Functions → Secrets → `ANTHROPIC_API_KEY`**. Para publicar mudanças na função: `supabase functions deploy agente`.
+- **Dieta** — metas e refeições com "Usar esta dieta".
+- **Refeição** — "comi 2 ovos e pão" vira kcal e macros com "Adicionar ao dia".
+- **Peso** e **água** — "pesei 82,4", "bebi 2 copos".
+- **Análise da semana** — em texto, com os números reais.
+
+Chaves em **Supabase → Edge Functions → Secrets**: `GEMINI_API_KEY` (crie grátis em aistudio.google.com) e, opcional, `GEMINI_MODEL` (padrão `gemini-flash-latest`). No plano gratuito o Google pode usar as conversas para melhorar os produtos dele.
+
+Para publicar mudanças na função: `supabase functions deploy agente`.

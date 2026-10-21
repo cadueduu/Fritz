@@ -56,10 +56,17 @@ export interface DietProposal {
   refeicoes: { id: PlanMealId; nome: string; horario: string; kcal: number; itens: string[]; substituicoes: string[] }[];
 }
 
+/** Something the agent proposed; it only takes effect when the user taps the card's button. */
+export type AgentAction =
+  | ({ type: 'dieta' } & DietProposal)
+  | { type: 'refeicao'; id: string; refeicao: MealId; data?: string; horario?: string; descricao: string; kcal: number; p: number; c: number; g: number; f: number }
+  | { type: 'peso'; kg: number; data?: string }
+  | { type: 'agua'; copos: number };
+
 export interface ChatMsg {
   from: 'user' | 'agent';
   text: string;
-  diet?: DietProposal;
+  actions?: AgentAction[];
 }
 
 export interface Weigh {
