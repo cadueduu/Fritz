@@ -61,7 +61,7 @@ export interface Weigh {
 
 export interface AppState {
   version: 1;
-  profile: { name: string };
+  profile: { name: string; email: string };
   planMode: 'nutro' | 'auto';
   dietGoals: Macros;
   dietMeals: DietMeal[];

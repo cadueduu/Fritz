@@ -3,11 +3,13 @@ import { addWeight, useApp } from '../store/app';
 import { goals, sumEntries } from '../lib/nutrition';
 import { dec, fmt } from '../lib/format';
 import { WEEK_LETTER, addDays, dateKey, daysBetween, parseKey, shortDate, today, todayKey } from '../lib/dates';
-import { MEASURES } from '../data/seed';
 import { TabBar } from '../components/TabBar';
 import './Progresso.css';
 
 const W = 280, H = 150;
+
+// body measurements are not stored yet; the cards show the layout without values
+const MEASURES = [['Cintura', 'cm'], ['Quadril', 'cm'], ['Braço', 'cm'], ['Coxa', 'cm'], ['Gordura corporal', '%'], ['Massa magra', 'kg']];
 
 function useWeightChart(weights: { date: string; kg: number }[], n: number) {
   const t0 = today();
@@ -123,13 +125,13 @@ export function Progresso() {
           <div className="muted" style={{ font: '500 calc(13 * var(--u))/1.45 var(--font)', borderTop: '1px solid var(--line)', paddingTop: 12 }}>O peso do dia varia com água e sal. Olhe para a linha: ela mostra a direção real.</div>
         </section>
 
-        <div className="row-between" style={{ marginTop: 4 }}><span className="h-sec">Medidas</span>{first && <span className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>desde {shortDate(parseKey(first.date))}</span>}</div>
+        <div className="row-between" style={{ marginTop: 4 }}><span className="h-sec">Medidas</span></div>
         <div className="grid2">
-          {MEASURES.map(m => (
-            <div key={m.label} className="card r20 measure">
-              <span className="label">{m.label}</span>
-              <span className="measure-val">{m.val}<span className="label"> {m.unit}</span></span>
-              <span className="measure-delta">{m.delta}</span>
+          {MEASURES.map(([label, unit]) => (
+            <div key={label} className="card r20 measure">
+              <span className="label">{label}</span>
+              <span className="measure-val">—<span className="label"> {unit}</span></span>
+              <span className="measure-delta muted" style={{ color: 'var(--ink2)' }}>sem registro</span>
             </div>
           ))}
         </div>

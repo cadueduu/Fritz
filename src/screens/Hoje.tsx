@@ -79,9 +79,9 @@ export function Hoje() {
         <div className="head row-between hoje-head">
           <div>
             <div className="hoje-date">{longDate(today())}</div>
-            <h1 className="h-screen">Olá, {name}</h1>
+            <h1 className="h-screen">{name ? 'Olá, ' + name : 'Olá!'}</h1>
           </div>
-          <button className="avatar" aria-label="Meu plano e perfil" onClick={() => navigate('plano')}>{name.slice(0, 2).toUpperCase()}</button>
+          <button className="avatar" aria-label="Meu plano e perfil" onClick={() => navigate('plano')}>{(name || s.profile.email || '?').slice(0, 2).toUpperCase()}</button>
         </div>
 
         <section className="card r28 ring-card">

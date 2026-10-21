@@ -12,5 +12,4 @@ export const norm = (s: string) =>
 
 export const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-let uid = 0;
-export const newId = () => Date.now().toString(36) + '-' + (++uid).toString(36);
+export const newId = () => crypto.randomUUID();

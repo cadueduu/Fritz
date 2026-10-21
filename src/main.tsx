@@ -9,6 +9,7 @@ import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '@fontsource/jetbrains-mono/500.css';
 import './styles/tokens.css';
 import './styles/base.css';
+import './screens/Login.css';
 import { App } from './App';
 
 const embedded = window.parent !== window;

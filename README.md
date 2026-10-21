@@ -14,9 +14,13 @@ App (PWA, mobile-first) de acompanhamento de emagrecimento, em português do Bra
 
 Tema claro/escuro segue o sistema. Tamanhos de texto em `rem` para respeitar o tamanho de fonte do usuário (Dynamic Type no iOS).
 
-## Nesta primeira versão
+## Dados (Supabase)
 
-Tudo roda no navegador, sem backend. Os dados ficam no `localStorage` do aparelho. No primeiro acesso, o app vem com dados de exemplo das últimas 4 semanas.
+Login com email e senha (Supabase Auth). Cada conta começa vazia. Refeições, água, pesagens, conversa com o agente e o plano ficam no Postgres do projeto Supabase **Fitz**, nas tabelas `profiles`, `entries`, `water`, `weights` e `messages`. Todas têm RLS: cada pessoa só lê e grava as próprias linhas. O perfil é criado por um trigger quando a conta é criada.
+
+A URL do projeto e a chave publicável ficam em `.env`. Essa chave foi feita para ir no navegador; quem protege os dados é o RLS. Nunca coloque a chave `service_role` no app.
+
+## Ainda simulado
 
 Simulado por enquanto: reconhecimento da foto (sempre o mesmo prato de exemplo), leitura da dieta importada, respostas do agente, leitor de código de barras, microfone e exportar PDF. A foto tirada aparece de verdade na análise e como miniatura no Diário.
 

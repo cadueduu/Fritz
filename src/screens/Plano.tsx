@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { Activity, Body, Macros } from '../types';
 import { setBody, setDietGoal, setPlanMode, useApp } from '../store/app';
 import { navigate } from '../hooks/useRoute';
+import { supabase } from '../lib/supabase';
 import { useToast } from '../hooks/useToast';
 import { autoGoals, autoPlan, autoSug } from '../lib/nutrition';
 import { dec, fmt } from '../lib/format';
@@ -71,8 +72,8 @@ export function Plano() {
               <div className="row" style={{ gap: 12 }}>
                 <div className="pdf placeholder mono">PDF</div>
                 <div className="grow">
-                  <div style={{ font: '700 calc(15 * var(--u)) var(--font)' }}>Dieta · Dra. Marina Alves</div>
-                  <div className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>Prescrita em 15 jul · revisão em 12 nov</div>
+                  <div style={{ font: '700 calc(15 * var(--u)) var(--font)' }}>Dieta do nutrólogo</div>
+                  <div className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>Importe a prescrição ou ajuste as metas abaixo</div>
                 </div>
               </div>
               {importing && (
@@ -178,6 +179,14 @@ export function Plano() {
             <button className="btn txt" style={{ height: 44, color: 'var(--pri)', fontSize: 'calc(14 * var(--u))' }} onClick={() => setPlanMode('nutro')}>Recebi uma dieta · cadastrar agora</button>
           </>
         )}
+
+        <section className="card account">
+          <div className="grow col" style={{ gap: 2 }}>
+            <span style={{ font: '600 calc(15 * var(--u)) var(--font)' }}>{s.profile.name || 'Sua conta'}</span>
+            <span className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>{s.profile.email}</span>
+          </div>
+          <button className="btn sec h44" onClick={() => supabase.auth.signOut()}>Sair</button>
+        </section>
       </div>
       {toast && <div className="toast bottom" role="status">{toast}</div>}
       <TabBar active="plano" />

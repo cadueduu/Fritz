@@ -1,0 +1,11 @@
+.screen.login { padding-top: calc(var(--sat) + 40px); padding-bottom: calc(40px + var(--sab)); gap: 16px; }
+.login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.login-name { font: 800 calc(30 * var(--u))/1 var(--display); letter-spacing: -.02em; }
+.login-sub { margin: -6px 0 4px; font: 500 calc(15 * var(--u))/1.5 var(--font); color: var(--ink2); }
+.card.login-card { gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field span { font: 600 calc(13 * var(--u)) var(--font); color: var(--ink2); }
+.field input { height: 52px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); padding: 0 16px; font: 500 max(16px, calc(16 * var(--u))) var(--font); outline: none; }
+.field input:focus { border-color: var(--pri); }
+.btn:disabled { opacity: .6; }
+.loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 32px; color: var(--ink2); font: 500 calc(14 * var(--u)) var(--font); }

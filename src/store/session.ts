@@ -19,9 +19,10 @@ interface Session {
   regMeal: MealId;
   draft: Draft | null;
   hojeToast: string | null;
+  syncError: string | null;
 }
 
-export const session = createStore<Session>({ regMeal: mealForNow(), draft: null, hojeToast: null });
+export const session = createStore<Session>({ regMeal: mealForNow(), draft: null, hojeToast: null, syncError: null });
 export const useSession = session.use;
 
 let draftId = 0;
