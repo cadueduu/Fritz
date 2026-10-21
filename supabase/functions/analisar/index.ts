@@ -1,4 +1,4 @@
-// Meal analysis on Claude Haiku, with Google Gemini as a fallback. Given a photo of a plate (or a text
+// Meal analysis on Google Gemini, with Claude Sonnet as a fallback. Given a photo of a plate (or a text
 // description, or a single food name), returns each food with an estimated portion, a confidence and
 // likely alternatives. The model names each food the way the TACO table does and the server looks it up
 // there, so nutrition comes from the table; the model's own values are used only for foods TACO lacks.
@@ -7,7 +7,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Anthropic from "npm:@anthropic-ai/sdk@1.0.0";
 
-const CLAUDE_MODEL = "claude-haiku-5-5";
+// Haiku misread plates that Gemini got right; Sonnet is the fallback for its stronger vision
+const CLAUDE_MODEL = "claude-sonnet-5-5";
 
 // The TACO table lives in the repo (src/data/taco.json, built by scripts/build-taco.mjs); load it once per instance.
 type TacoRow = [number, string, string, number, number, number, number, number];
@@ -165,7 +166,7 @@ Deno.serve(async (req) => {
       model: CLAUDE_MODEL,
       max_tokens: 4096,
       system: SYSTEM,
-      output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMA } },
+      output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
       messages: [{ role: "user", content }],
     });
     if (res.stop_reason === "refusal") return { itens: [], aviso: "Não consegui analisar esta imagem." };
@@ -213,16 +214,16 @@ Deno.serve(async (req) => {
 
   let out: Analysis;
   try {
-    out = await viaClaude();
-  } catch (claudeErr) {
-    console.error("claude failed, trying gemini", claudeErr);
+    out = await viaGemini();
+  } catch (geminiErr) {
+    console.error("gemini failed, trying claude", geminiErr);
     try {
-      out = await viaGemini();
-    } catch (geminiErr) {
-      console.error("gemini failed", geminiErr);
-      // with no Gemini key the Claude failure is the one worth reporting
-      const r = reason(geminiErr);
-      return json({ error: r === "missing_key" ? reason(claudeErr) : r }, 502);
+      out = await viaClaude();
+    } catch (claudeErr) {
+      console.error("claude failed", claudeErr);
+      // with no Anthropic key the Gemini failure is the one worth reporting
+      const r = reason(claudeErr);
+      return json({ error: r === "missing_key" ? reason(geminiErr) : r }, 502);
     }
   }
 
