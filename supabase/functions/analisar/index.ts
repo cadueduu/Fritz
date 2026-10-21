@@ -9,6 +9,10 @@ import Anthropic from "npm:@anthropic-ai/sdk@1.0.0";
 
 // Haiku misread plates that Gemini got right; Sonnet is the fallback for its stronger vision
 const CLAUDE_MODEL = "claude-sonnet-5-5";
+// Answer within ~10 s on the phone: Gemini starts at once, Claude joins if Gemini is slow or fails,
+// the first good answer wins, and past the deadline the app is told to try again.
+const HEDGE_MS = 4_000;
+const DEADLINE_MS = 9_000;
 
 // The TACO table lives in the repo (src/data/taco.json, built by scripts/build-taco.mjs); load it once per instance.
 type TacoRow = [number, string, string, number, number, number, number, number];
@@ -55,7 +59,7 @@ const CORS = {
 const SYSTEM = `Você é um nutricionista brasileiro que analisa refeições para um app de registro alimentar.
 Identifique cada alimento separadamente (ex.: arroz, feijão, frango grelhado, salada, molho, bebida) e estime a quantidade em gramas pelo tamanho no prato, talheres e prato como referência. Para bebidas, use ml como gramas.
 Dê valores nutricionais POR 100 g do alimento como preparado (cozido, grelhado, frito…), preferindo a tabela TACO; para produtos industrializados use rótulos típicos.
-Para cada item, dê a confiança da identificação (0 a 100) e até 3 alternativas plausíveis caso a identificação esteja errada (ex.: frango grelhado → frango frito, peixe grelhado), também com valores por 100 g.
+Para cada item, dê a confiança da identificação (0 a 100) e até 2 alternativas plausíveis caso a identificação esteja errada (ex.: frango grelhado → frango frito, peixe grelhado), também com valores por 100 g.
 Inclua óleo/azeite/manteiga visível ou provável só se houver sinal claro. Não invente itens que não aparecem.
 Se a imagem não for comida, devolva itens vazio e explique em "aviso".
 Nomes em português do Brasil, curtos e específicos (ex.: "Arroz branco cozido", "Peito de frango grelhado").
@@ -155,6 +159,9 @@ Deno.serve(async (req) => {
     return json({ error: "no_input" }, 400);
   }
   const mime = body.mime || "image/jpeg";
+  const tacoReady = loadTaco(); // fetch the table while the model works
+  const deadline = Date.now() + DEADLINE_MS;
+  const stop = new AbortController(); // cancels whichever model is still running once there is an answer
 
   const viaClaude = async (): Promise<Analysis> => {
     if (!anthropicKey) throw new AnalysisError("missing_key");
@@ -166,9 +173,9 @@ Deno.serve(async (req) => {
       model: CLAUDE_MODEL,
       max_tokens: 4096,
       system: SYSTEM,
-      output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
+      output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMA } },
       messages: [{ role: "user", content }],
-    });
+    }, { signal: stop.signal, maxRetries: 0 });
     if (res.stop_reason === "refusal") return { itens: [], aviso: "Não consegui analisar esta imagem." };
     return JSON.parse(res.content.filter(b => b.type === "text").map(b => (b as Anthropic.TextBlock).text).join(""));
   };
@@ -177,18 +184,32 @@ Deno.serve(async (req) => {
     if (!geminiKey) throw new AnalysisError("missing_key");
     const models = [...new Set([Deno.env.get("GEMINI_MODEL") || "gemini-flash-latest", "gemini-flash-lite-latest"])];
     const parts = body.imagem ? [{ inlineData: { mimeType: mime, data: body.imagem } }, { text: prompt }] : [{ text: prompt }];
+    // thinking made Gemini slow and adds little for spotting foods; dropped if a model rejects the setting
+    let thinking: Record<string, string> | null = { thinkingLevel: "minimal" };
     let last = 0;
     while (models.length) {
       for (let attempt = 0; attempt < 2; attempt++) {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${models[0]}:generateContent`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: SYSTEM }] },
-            contents: [{ role: "user", parts }],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 4096, responseMimeType: "application/json", responseSchema: GEMINI_SCHEMA },
-          }),
-        });
+        const left = deadline - Date.now();
+        if (left < 2000) throw new AnalysisError("overloaded");
+        let res: Response;
+        try {
+          res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${models[0]}:generateContent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+            signal: stop.signal,
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: SYSTEM }] },
+              contents: [{ role: "user", parts }],
+              generationConfig: {
+                temperature: 0.2, maxOutputTokens: 4096, responseMimeType: "application/json", responseSchema: GEMINI_SCHEMA,
+                ...(thinking && { thinkingConfig: thinking }),
+              },
+            }),
+          });
+        } catch (err) {
+          console.error("gemini", models[0], "stopped", err);
+          throw new AnalysisError("overloaded");
+        }
         if (res.ok) {
           const data = await res.json();
           const text = (data.candidates?.[0]?.content?.parts ?? []).filter((p: { text?: string; thought?: boolean }) => p.text && !p.thought).map((p: { text: string }) => p.text).join("");
@@ -199,6 +220,7 @@ Deno.serve(async (req) => {
         console.error("gemini", models[0], res.status, detail);
         if (res.status === 401 || res.status === 403 || /API.?key/i.test(detail)) throw new AnalysisError("bad_key");
         if (res.status === 402) throw new AnalysisError("no_credits");
+        if (res.status === 400 && thinking && /thinking/i.test(detail)) { thinking = null; attempt--; continue; }
         if (res.status !== 500 && res.status !== 503) break; // 400 (e.g. unsupported image), 404, 429: try the next model
         await new Promise(r => setTimeout(r, 1200 * (attempt + 1)));
       }
@@ -212,22 +234,34 @@ Deno.serve(async (req) => {
       : err instanceof Anthropic.APIError ? (err.status === 401 ? "bad_key" : err.status === 429 ? "rate_limited" : "overloaded")
       : "overloaded";
 
-  let out: Analysis;
-  try {
-    out = await viaGemini();
-  } catch (geminiErr) {
-    console.error("gemini failed, trying claude", geminiErr);
-    try {
-      out = await viaClaude();
-    } catch (claudeErr) {
-      console.error("claude failed", claudeErr);
-      // with no Anthropic key the Gemini failure is the one worth reporting
-      const r = reason(claudeErr);
-      return json({ error: r === "missing_key" ? reason(geminiErr) : r }, 502);
-    }
-  }
+  // Gemini first; Claude after HEDGE_MS or as soon as Gemini fails. Resolves with the first answer,
+  // or with the error to report once both have failed or the deadline passes.
+  const out = await new Promise<Analysis | { error: string }>(resolve => {
+    let failures = 0, geminiErr: unknown = null, claudeStarted = false;
+    const finish = (v: Analysis | { error: string }) => { clearTimeout(hedge); clearTimeout(cap); stop.abort(); resolve(v); };
+    const failed = (which: string, err: unknown) => {
+      if (stop.signal.aborted) return;
+      console.error(which, "failed", err);
+      failures++;
+      if (which === "gemini") { geminiErr = err; startClaude(); }
+      if (failures === 2) {
+        // with no Anthropic key the Gemini failure is the one worth reporting
+        const r = reason(err);
+        finish({ error: r === "missing_key" ? reason(geminiErr) : r });
+      }
+    };
+    const startClaude = () => {
+      if (claudeStarted) return;
+      claudeStarted = true;
+      viaClaude().then(finish, e => failed("claude", e));
+    };
+    const hedge = setTimeout(startClaude, HEDGE_MS);
+    const cap = setTimeout(() => { console.error("no answer in", DEADLINE_MS, "ms"); finish({ error: "slow" }); }, deadline - Date.now());
+    viaGemini().then(finish, e => failed("gemini", e));
+  });
+  if ("error" in out) return json({ error: out.error }, 502);
 
-  const index = indexRows(await loadTaco());
+  const index = indexRows(await tacoReady);
   const itens = (Array.isArray(out.itens) ? out.itens : []).map(i => ({
     ...ground(index, i),
     alternativas: (Array.isArray(i.alternativas) ? i.alternativas : []).map(a => ground(index, a)),

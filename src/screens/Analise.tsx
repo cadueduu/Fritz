@@ -34,7 +34,8 @@ const ERRORS: Record<string, string> = {
   no_credits: 'Os créditos de IA acabaram. Recarregue em console.anthropic.com ou troque a chave do Gemini por uma de um projeto gratuito.',
   rate_limited: 'O limite de uso da IA foi atingido por agora. Espere um minuto e tente de novo.',
   overloaded: 'A IA está sobrecarregada agora. Tente de novo em alguns instantes.',
-  too_big: 'A foto ficou grande demais. Tente de novo.'
+  too_big: 'A foto ficou grande demais. Tente de novo.',
+  slow: 'A análise passou de 10 segundos. Tente de novo ou descreva a refeição em texto.'
 };
 
 const num = (v: unknown, hi: number) => clamp(Number(v) || 0, 0, hi);
@@ -103,7 +104,7 @@ export function Analise() {
     setPhase('loading'); setFailure(''); setAviso(''); setItems([]); setCorrecting(null); setResult(null);
     try {
       const body: Record<string, string> = { refeicao: MEAL_LABEL[draft.meal] };
-      if (draft.file) body.imagem = await toJpegBase64(draft.file);
+      if (draft.file) body.imagem = await toJpegBase64(draft.file, 768); // smaller upload and fewer image tokens, for a faster answer
       if (draft.text) body.texto = draft.text;
       const r = await analyze(body);
       setItems(r.itens);
