@@ -91,3 +91,6 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+-- diet proposed by the agent in that message, applied only when the user taps "Usar esta dieta"
+alter table public.messages add column diet jsonb;

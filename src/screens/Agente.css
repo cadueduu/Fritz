@@ -44,3 +44,9 @@
 .chat-input:focus { border-color: var(--pri); }
 .send { width: 48px; height: 48px; flex: none; border-radius: 24px; border: 0; background: var(--pri); color: var(--onPri); font: 700 18px var(--font); }
 .toast.agent-toast { top: calc(var(--sat) + 72px); }
+.chat > .col { flex: none; }
+.chat > .col > .bubble.user { align-self: flex-end; }
+.card.diet-card { padding: 18px; border: 1.5px solid var(--pri); gap: 12px; }
+.diet-meal { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 10px; }
+.bubble.failure { background: var(--ambSoft); color: var(--amb); }
+.send:disabled { opacity: .5; }

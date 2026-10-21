@@ -72,8 +72,8 @@ export function Plano() {
               <div className="row" style={{ gap: 12 }}>
                 <div className="pdf placeholder mono">PDF</div>
                 <div className="grow">
-                  <div style={{ font: '700 calc(15 * var(--u)) var(--font)' }}>Dieta do nutrólogo</div>
-                  <div className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>Importe a prescrição ou ajuste as metas abaixo</div>
+                  <div style={{ font: '700 calc(15 * var(--u)) var(--font)' }}>Sua dieta</div>
+                  <div className="muted" style={{ font: '500 calc(13 * var(--u)) var(--font)' }}>Importe a do nutrólogo, peça ao agente ou ajuste abaixo</div>
                 </div>
               </div>
               {importing && (
@@ -92,7 +92,7 @@ export function Plano() {
             </section>
 
             <section className="card">
-              <div className="row-between"><span className="h-card">Metas diárias</span><span className="small" style={{ fontWeight: 500 }}>definidas pelo nutrólogo</span></div>
+              <div className="row-between"><span className="h-card">Metas diárias</span><span className="small" style={{ fontWeight: 500 }}>da sua dieta</span></div>
               <div className="grid2" style={{ gap: 8 }}>
                 {GOAL_FIELDS.map(([k, label, unit, color]) => (
                   <label key={k} className="goal">

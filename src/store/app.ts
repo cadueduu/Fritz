@@ -1,5 +1,5 @@
 // App data, loaded from Supabase after sign-in. Actions update the screen immediately and save in the background.
-import type { AppState, Body, ChatMsg, DietMeal, Entry, Macros, MealId } from '../types';
+import type { AppState, Body, ChatMsg, DietMeal, DietProposal, Entry, Macros, MealId } from '../types';
 import { DEFAULT_GOALS, DIET } from '../data/plan';
 import { supabase } from '../lib/supabase';
 import { createStore } from './createStore';
@@ -62,7 +62,7 @@ export async function loadUserData(userId: string, email = '') {
     supabase.from('entries').select('*').order('day').order('time'),
     supabase.from('water').select('day, cups'),
     supabase.from('weights').select('day, kg').order('day'),
-    supabase.from('messages').select('sender, text').order('created_at')
+    supabase.from('messages').select('sender, text, diet').order('created_at')
   ]);
   const err = profile.error || entries.error || water.error || weights.error || msgs.error;
   if (err) throw err;
@@ -84,7 +84,7 @@ export async function loadUserData(userId: string, email = '') {
   Object.values(s.diaries).forEach(list => list.sort(byTime));
   (water.data as { day: string; cups: number }[]).forEach(w => { s.water[w.day] = w.cups; });
   s.weights = (weights.data as { day: string; kg: number }[]).map(w => ({ date: w.day, kg: +w.kg }));
-  s.msgs = (msgs.data as { sender: ChatMsg['from']; text: string }[]).map(m => ({ from: m.sender, text: m.text }));
+  s.msgs = (msgs.data as { sender: ChatMsg['from']; text: string; diet: DietProposal | null }[]).map(m => ({ from: m.sender, text: m.text, diet: m.diet ?? undefined }));
   set(() => s);
   profileUser = userId;
 }
@@ -138,7 +138,18 @@ export const setBody = <K extends keyof Body>(k: K, v: Body[K]) => { set(s => ({
 
 export const addMsg = (m: ChatMsg) => {
   set(s => ({ ...s, msgs: [...s.msgs, m] }));
-  save(supabase.from('messages').insert({ sender: m.from, text: m.text }));
+  save(supabase.from('messages').insert({ sender: m.from, text: m.text, diet: m.diet ?? null }));
+};
+
+/** Makes an agent-proposed diet the user's plan (goals and meals). Only called from the user's tap. */
+export const applyDiet = (d: DietProposal) => {
+  set(s => ({
+    ...s,
+    planMode: 'nutro',
+    dietGoals: { ...d.metas },
+    dietMeals: d.refeicoes.map(r => ({ id: r.id, name: r.nome, time: r.horario, kcal: r.kcal, items: r.itens, subs: r.substituicoes }))
+  }));
+  saveProfile();
 };
 
 export const addWeight = (date: string, kg: number) => {

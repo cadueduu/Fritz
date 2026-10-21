@@ -43,11 +43,53 @@ export const planList = (s: AppState): PlanMeal[] =>
     ? autoPlan(autoGoals(s.body).kcal)
     : s.dietMeals.map(m => ({ id: m.id, name: m.name, time: m.time, kcal: m.kcal }));
 
-/** Portion suggestion for a meal of `k` kcal when the user has no diet. */
-export const autoSug = (id: PlanMealId, k: number) => ({
-  cafe: '2 ovos + ' + Math.max(1, Math.round((k - 150) / 70)) + ' fatia(s) de pão integral + 1 fruta',
-  lanche1: 'Iogurte natural + ' + Math.max(1, Math.round((k - 110) / 40)) + ' col. de aveia',
-  almoco: r10((k * 0.3) / 1.28) + ' g de arroz + ' + r10((k * 0.15) / 0.76) + ' g de feijão + ' + r10((k * 0.4) / 1.59) + ' g de frango + salada à vontade',
-  lanche2: '1 fruta + ' + Math.max(10, r10((k - 70) / 6)) + ' g de castanhas',
-  jantar: r10((k * 0.45) / 1.59) + ' g de frango ou peixe + ' + r10((k * 0.3) / 0.77) + ' g de batata-doce + legumes'
-})[id];
+type Food = [kcal: number, min: number, max: number, label: (n: number) => string];
+
+/** Adds units of each food in turn, within its min/max, until the meal reaches about `k` kcal. */
+const fill = (k: number, foods: Food[]) => {
+  const n = foods.map(f => f[1]);
+  let total = foods.reduce((a, f, i) => a + f[0] * n[i], 0);
+  for (let added = true; added;) {
+    added = false;
+    foods.forEach((f, i) => {
+      if (n[i] < f[2] && total + f[0] <= k + f[0] * 0.3) { n[i]++; total += f[0]; added = true; }
+    });
+  }
+  return foods.flatMap((f, i) => (n[i] > 0 ? [f[3](n[i])] : [])).join(' + ');
+};
+
+const g10 = (kcal: number, perGram: number, lo: number, hi: number) => clampN(r10(kcal / perGram), lo, hi);
+const clampN = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+const pl = (n: number, one: string, many: string) => n + ' ' + (n > 1 ? many : one);
+
+/** Portion suggestion for a meal of `k` kcal when the user has no diet. Portions stay within everyday amounts. */
+export const autoSug = (id: PlanMealId, k: number): string => {
+  switch (id) {
+    case 'cafe':
+      return fill(k, [
+        [70, 2, 3, n => pl(n, 'ovo', 'ovos')],
+        [65, 1, 2, n => pl(n, 'fatia de pão integral', 'fatias de pão integral')],
+        [70, 0, 1, () => '1 fruta'],
+        [70, 0, 1, () => '30 g de queijo branco'],
+        [110, 0, 1, () => '1 iogurte natural'],
+        [40, 0, 2, n => pl(n, 'col. de aveia', 'col. de aveia')]
+      ]);
+    case 'lanche1':
+      return fill(k, [
+        [110, 1, 1, () => 'Iogurte natural'],
+        [70, 0, 1, () => '1 fruta'],
+        [40, 0, 2, n => pl(n, 'col. de aveia', 'col. de aveia')],
+        [60, 0, 2, n => n * 10 + ' g de castanhas']
+      ]);
+    case 'almoco':
+      return g10(k * 0.3, 1.28, 60, 200) + ' g de arroz + ' + g10(k * 0.15, 0.76, 60, 160) + ' g de feijão + ' + g10(k * 0.4, 1.59, 100, 200) + ' g de frango + salada à vontade com 1 col. chá de azeite';
+    case 'lanche2':
+      return fill(k, [
+        [70, 1, 1, () => '1 fruta'],
+        [60, 0, 3, n => n * 10 + ' g de castanhas'],
+        [110, 0, 1, () => '1 iogurte natural']
+      ]);
+    case 'jantar':
+      return g10(k * 0.5, 1.59, 100, 200) + ' g de frango ou peixe + ' + g10(k * 0.3, 0.77, 80, 250) + ' g de batata-doce + legumes à vontade';
+  }
+};

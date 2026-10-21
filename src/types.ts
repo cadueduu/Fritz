@@ -49,9 +49,17 @@ export interface Body {
   ritmo: number;
 }
 
+/** A full diet proposed by the agent (field names match the agent's tool schema). */
+export interface DietProposal {
+  resumo: string;
+  metas: Macros;
+  refeicoes: { id: PlanMealId; nome: string; horario: string; kcal: number; itens: string[]; substituicoes: string[] }[];
+}
+
 export interface ChatMsg {
   from: 'user' | 'agent';
   text: string;
+  diet?: DietProposal;
 }
 
 export interface Weigh {

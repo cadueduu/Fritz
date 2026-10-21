@@ -9,7 +9,7 @@ App (PWA, mobile-first) de acompanhamento de emagrecimento, em português do Bra
 - **Análise da foto** — skeleton de carregamento, alimentos com porção editável (slider/campo), confiança, "Corrigir", perguntas rápidas e comparação com o plano. Só soma no dia depois de "Comi isso".
 - **Diário** — linha do tempo por dia, faixa da semana, visão semanal, editar porção e excluir com "Desfazer".
 - **Progresso** — peso com média móvel de 7 dias, nova pesagem, medidas, fotos, calorias vs meta, aderência e consistência.
-- **Agente** — resumo semanal, proposta para o nutrólogo (compartilhar) e chat com sugestões rápidas.
+- **Agente** — chat com Claude (Opus 5.5) que conhece seu perfil, metas e registros. Monta a dieta quando você pede (cartão com "Usar esta dieta") e mostra o resumo semanal.
 - **Meu plano** — "Tenho dieta" (metas e refeições do nutrólogo) ou "Não tenho dieta" (metas calculadas por Mifflin-St Jeor + déficit, com mínimo seguro).
 
 Tema claro/escuro segue o sistema. Tamanhos de texto em `rem` para respeitar o tamanho de fonte do usuário (Dynamic Type no iOS).
@@ -22,7 +22,7 @@ A URL do projeto e a chave publicável ficam em `.env`. Essa chave foi feita par
 
 ## Ainda simulado
 
-Simulado por enquanto: reconhecimento da foto (sempre o mesmo prato de exemplo), leitura da dieta importada, respostas do agente, leitor de código de barras, microfone e exportar PDF. A foto tirada aparece de verdade na análise e como miniatura no Diário.
+Simulado por enquanto: reconhecimento da foto (sempre o mesmo prato de exemplo), leitura da dieta importada, leitor de código de barras e microfone. A foto tirada aparece de verdade na análise e como miniatura no Diário.
 
 ## Desenvolvimento
 
@@ -53,3 +53,9 @@ git add leve_build && git commit -m "Atualiza build"
 ```
 
 Dentro do Streamlit o app não registra o service worker (não funciona offline nem é instalável); para isso, use o GitHub Pages.
+
+## Agente (Supabase Edge Function)
+
+`supabase/functions/agente` chama a API da Anthropic (Claude Opus 5.5). O app manda a conversa e um resumo dos seus dados; quando você pede uma dieta, o agente usa a ferramenta `propor_dieta` e o app mostra o cartão com "Usar esta dieta". Nada muda no plano sem esse toque.
+
+A chave fica só no Supabase: **Edge Functions → Secrets → `ANTHROPIC_API_KEY`**. Para publicar mudanças na função: `supabase functions deploy agente`.

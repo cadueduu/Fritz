@@ -87,7 +87,7 @@ export function Hoje() {
         <section className="card r28 ring-card">
           <div className="row-between" style={{ alignItems: 'center' }}>
             <span className="h-card">Calorias</span>
-            <span className="badge neutral" style={{ fontWeight: 600 }}>{isAuto ? 'Meta calculada' : 'Meta do nutrólogo'}</span>
+            <span className="badge neutral" style={{ fontWeight: 600 }}>{isAuto ? 'Meta calculada' : 'Meta da sua dieta'}</span>
           </div>
           <div className="ring">
             <svg width="224" height="224" viewBox="0 0 224 224" aria-hidden>
