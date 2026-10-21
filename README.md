@@ -70,7 +70,7 @@ Para publicar mudanças na função: `supabase functions deploy agente`.
 
 ## Análise da foto (Supabase Edge Function + Gemini + TACO)
 
-`supabase/functions/analisar` recebe a foto (reduzida para 1024 px), uma descrição em texto ou o nome de um alimento. O Gemini identifica cada alimento, estima a porção em gramas e escolhe o item correspondente da tabela TACO; as calorias e os macros vêm da própria tabela (quando não há item na TACO, fica a estimativa da IA, marcada como "estimativa IA"). No app, cada item precisa ser conferido ("Está certo" ou "Não é isso") e a pessoa informa a refeição e o horário antes de somar ao dia.
+`supabase/functions/analisar` recebe a foto (reduzida para 1024 px), uma descrição em texto ou o nome de um alimento. O Gemini identifica cada alimento, estima a porção em gramas e escreve o nome no formato da tabela TACO; o servidor procura esse nome na tabela (mesmo alimento e mesmo preparo) e as calorias e os macros vêm da própria tabela (quando não há item na TACO, fica a estimativa da IA, marcada como "estimativa IA"). No app, cada item precisa ser conferido ("Está certo" ou "Não é isso") e a pessoa informa a refeição e o horário antes de somar ao dia.
 
 A tabela é carregada de `src/data/taco.json` no GitHub (variável `TACO_URL` para trocar). Para publicar mudanças: `supabase functions deploy analisar`.
 

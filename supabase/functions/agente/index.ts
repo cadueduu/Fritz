@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) return json({ error: "missing_key" }, 500);
   // free-tier models get overloaded (503) or hit per-model quotas (429); fall back down this list
-  const models = [...new Set([Deno.env.get("GEMINI_MODEL") || "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"])];
+  const models = [...new Set([Deno.env.get("GEMINI_MODEL") || "gemini-flash-latest", "gemini-flash-lite-latest"])];
 
   let body: { messages?: ChatMsg[]; context?: unknown };
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
@@ -178,6 +178,7 @@ Deno.serve(async (req) => {
         last = res.status;
         console.error(models[0], res.status, await res.text());
         if (res.status === 400 || res.status === 401 || res.status === 403) return { error: "bad_key" };
+        if (res.status === 402) return { error: "no_credits" }; // billing project out of prepaid credits
         if (res.status !== 500 && res.status !== 503) break; // 404 / 429: this model won't work now, try the next
         await new Promise(r => setTimeout(r, 1200 * (attempt + 1)));
       }

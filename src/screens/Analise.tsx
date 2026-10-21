@@ -31,6 +31,7 @@ const TAGPOS = [{ l: '8%', t: '40%' }, { l: '56%', t: '36%' }, { l: '50%', t: '6
 const ERRORS: Record<string, string> = {
   missing_key: 'A análise ainda não está configurada: falta a chave do Gemini (GEMINI_API_KEY) no Supabase.',
   bad_key: 'A chave do Gemini configurada no Supabase não é válida.',
+  no_credits: 'Os créditos da chave do Gemini acabaram. Crie uma chave nova num projeto sem cobrança (plano gratuito) ou recarregue no Google AI Studio.',
   rate_limited: 'O limite gratuito da IA foi atingido por agora. Espere um minuto e tente de novo.',
   overloaded: 'A IA gratuita está sobrecarregada agora. Tente de novo em alguns instantes.',
   too_big: 'A foto ficou grande demais. Tente de novo.'
