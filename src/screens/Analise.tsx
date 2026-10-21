@@ -29,11 +29,11 @@ interface Raw extends Food100 { gramas?: number; confianca?: number; alternativa
 const DOTS = ['var(--mC)', 'var(--mF)', 'var(--mP)', 'var(--pri)', 'var(--mG)'];
 const TAGPOS = [{ l: '8%', t: '40%' }, { l: '56%', t: '36%' }, { l: '50%', t: '63%' }, { l: '10%', t: '67%' }, { l: '34%', t: '51%' }];
 const ERRORS: Record<string, string> = {
-  missing_key: 'A análise ainda não está configurada: falta a chave do Gemini (GEMINI_API_KEY) no Supabase.',
-  bad_key: 'A chave do Gemini configurada no Supabase não é válida.',
-  no_credits: 'Os créditos da chave do Gemini acabaram. Crie uma chave nova num projeto sem cobrança (plano gratuito) ou recarregue no Google AI Studio.',
-  rate_limited: 'O limite gratuito da IA foi atingido por agora. Espere um minuto e tente de novo.',
-  overloaded: 'A IA gratuita está sobrecarregada agora. Tente de novo em alguns instantes.',
+  missing_key: 'A análise ainda não está configurada: faltam as chaves de IA (ANTHROPIC_API_KEY / GEMINI_API_KEY) no Supabase.',
+  bad_key: 'Uma chave de IA configurada no Supabase não é válida.',
+  no_credits: 'Os créditos de IA acabaram. Recarregue em console.anthropic.com ou troque a chave do Gemini por uma de um projeto gratuito.',
+  rate_limited: 'O limite de uso da IA foi atingido por agora. Espere um minuto e tente de novo.',
+  overloaded: 'A IA está sobrecarregada agora. Tente de novo em alguns instantes.',
   too_big: 'A foto ficou grande demais. Tente de novo.'
 };
 

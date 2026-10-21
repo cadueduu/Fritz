@@ -85,11 +85,11 @@ function agentContext(s: AppState) {
 }
 
 const ERRORS: Record<string, string> = {
-  missing_key: 'O agente ainda não está configurado: falta a chave do Gemini (GEMINI_API_KEY) no Supabase.',
-  bad_key: 'A chave do Gemini configurada no Supabase não é válida ou o modelo não está disponível.',
-  no_credits: 'Os créditos da chave do Gemini acabaram. Crie uma chave nova num projeto sem cobrança (plano gratuito) ou recarregue no Google AI Studio.',
-  rate_limited: 'O limite gratuito do Gemini foi atingido por agora. Espere um minuto e tente de novo.',
-  overloaded: 'A IA gratuita está sobrecarregada agora (isso costuma passar em alguns minutos). Tente de novo daqui a pouco.'
+  missing_key: 'O agente ainda não está configurado: faltam as chaves de IA (GEMINI_API_KEY / ANTHROPIC_API_KEY) no Supabase.',
+  bad_key: 'Uma chave de IA configurada no Supabase não é válida.',
+  no_credits: 'Os créditos de IA acabaram. Recarregue em console.anthropic.com ou troque a chave do Gemini por uma de um projeto gratuito.',
+  rate_limited: 'O limite de uso da IA foi atingido por agora. Espere um minuto e tente de novo.',
+  overloaded: 'A IA está sobrecarregada agora. Tente de novo em alguns instantes.'
 };
 
 function DietCard({ d }: { d: DietProposal }) {

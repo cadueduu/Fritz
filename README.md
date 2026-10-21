@@ -9,7 +9,7 @@ App (PWA, mobile-first) de acompanhamento de emagrecimento, em português do Bra
 - **Análise da foto** — skeleton de carregamento, alimentos com porção editável (slider/campo), confiança, "Corrigir", perguntas rápidas e comparação com o plano. Só soma no dia depois de "Comi isso".
 - **Diário** — linha do tempo por dia, faixa da semana, visão semanal, editar porção e excluir com "Desfazer".
 - **Progresso** — peso com média móvel de 7 dias, nova pesagem, medidas, fotos, calorias vs meta, aderência e consistência.
-- **Agente** — chat com IA (Gemini, gratuito) que conhece seu perfil, metas e registros: monta a dieta, registra refeições, peso e água (sempre com um toque para confirmar) e analisa a semana.
+- **Agente** — chat com IA (Gemini gratuito na conversa, Claude para montar a dieta) que conhece seu perfil, metas e registros: monta a dieta, registra refeições, peso e água (sempre com um toque para confirmar) e analisa a semana.
 - **Meu plano** — "Tenho dieta" (metas e refeições do nutrólogo) ou "Não tenho dieta" (metas calculadas por Mifflin-St Jeor + déficit, com mínimo seguro).
 
 Tema claro/escuro segue o sistema. Tamanhos de texto em `rem` para respeitar o tamanho de fonte do usuário (Dynamic Type no iOS).
@@ -50,15 +50,19 @@ git add leve_build && git commit -m "Atualiza build"
 
 Dentro do Streamlit o app não registra o service worker, então não funciona offline nem é instalável.
 
-## Agente (Supabase Edge Function + Gemini)
+## IA: quem faz o quê
 
-`supabase/functions/agente` usa o **Google Gemini** pelo plano gratuito. O app manda a conversa e um resumo dos seus dados (perfil, metas, plano, registros de 28 dias, água, pesagens). O agente responde e pode propor ações, cada uma com um botão de confirmar:
+| Parte | Modelo | Reserva |
+|---|---|---|
+| Conversa do agente (anamnese, dúvidas, registrar refeição/peso/água, análise da semana) | Google Gemini (`gemini-flash-latest`, plano gratuito) | Claude Haiku 5.5 |
+| Montar a dieta (ferramenta `montar_dieta` chamada pela conversa) | Claude Sonnet 5.5 | — (`fallbacks: "default"` da Anthropic) |
+| Análise da foto, da descrição e de um alimento digitado | Claude Haiku 5.5 | Gemini |
 
-- **Dieta** — metas e refeições com "Usar esta dieta".
-- **Refeição** — "comi 2 ovos e pão" vira kcal e macros com "Adicionar ao dia".
-- **Peso** e **água** — "pesei 82,4", "bebi 2 copos".
-- **Análise da semana** — em texto, com os números reais.
-- **Anamnese antes da dieta** — o agente conversa como um nutrólogo (objetivo, saúde, sono, intestino, álcool, fome, treino, rotina de cozinha…) e anota as respostas no perfil (`profiles.onboarding.anamnese`) para não perguntar de novo.
+Chaves em **Supabase → Edge Functions → Secrets**: `ANTHROPIC_API_KEY` e `GEMINI_API_KEY` (de um projeto **sem cobrança** no Google AI Studio, para usar o plano gratuito). Opcional: `GEMINI_MODEL`. No plano gratuito o Google pode usar as conversas para melhorar os produtos dele; fotos e dietas vão para a Anthropic.
+
+O agente faz uma anamnese antes da dieta (objetivo, saúde, sono, intestino, álcool, fome, treino, rotina de cozinha…) e anota as respostas no perfil (`profiles.onboarding.anamnese`). Dieta, refeição, peso e água aparecem como cartões com botão de confirmar.
+
+Para publicar mudanças: `supabase functions deploy agente` e `supabase functions deploy analisar`.
 
 ## Cadastro e questionário
 
@@ -68,9 +72,9 @@ Chaves em **Supabase → Edge Functions → Secrets**: `GEMINI_API_KEY` (crie gr
 
 Para publicar mudanças na função: `supabase functions deploy agente`.
 
-## Análise da foto (Supabase Edge Function + Gemini + TACO)
+## Análise da foto (TACO)
 
-`supabase/functions/analisar` recebe a foto (reduzida para 1024 px), uma descrição em texto ou o nome de um alimento. O Gemini identifica cada alimento, estima a porção em gramas e escreve o nome no formato da tabela TACO; o servidor procura esse nome na tabela (mesmo alimento e mesmo preparo) e as calorias e os macros vêm da própria tabela (quando não há item na TACO, fica a estimativa da IA, marcada como "estimativa IA"). No app, cada item precisa ser conferido ("Está certo" ou "Não é isso") e a pessoa informa a refeição e o horário antes de somar ao dia.
+`supabase/functions/analisar` recebe a foto (reduzida para 1024 px), uma descrição em texto ou o nome de um alimento. A IA identifica cada alimento, estima a porção em gramas e escreve o nome no formato da tabela TACO; o servidor procura esse nome na tabela (mesmo alimento e mesmo preparo) e as calorias e os macros vêm da própria tabela (quando não há item na TACO, fica a estimativa da IA, marcada como "estimativa IA"). No app, cada item precisa ser conferido ("Está certo" ou "Não é isso") e a pessoa informa a refeição e o horário antes de somar ao dia.
 
 A tabela é carregada de `src/data/taco.json` no GitHub (variável `TACO_URL` para trocar). Para publicar mudanças: `supabase functions deploy analisar`.
 
