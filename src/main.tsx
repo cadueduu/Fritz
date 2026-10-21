@@ -11,7 +11,13 @@ import './styles/tokens.css';
 import './styles/base.css';
 import { App } from './App';
 
-registerSW({ immediate: true });
+const embedded = window.parent !== window;
+if (embedded) {
+  // running inside the Streamlit wrapper (streamlit_app.py): tell the host the component loaded
+  window.parent.postMessage({ isStreamlitMessage: true, type: 'streamlit:componentReady', apiVersion: 1 }, '*');
+} else {
+  registerSW({ immediate: true });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

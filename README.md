@@ -34,3 +34,18 @@ React 19 + Vite + TypeScript, `vite-plugin-pwa` (manifest + service worker, func
 ## Publicação (GitHub Pages)
 
 O workflow `.github/workflows/deploy.yml` publica a cada push na `main`. Uma vez só: em **Settings → Pages**, escolha **Source: GitHub Actions**. O site fica em `https://<usuário>.github.io/<repositório>/`.
+
+## Publicação (Streamlit Community Cloud)
+
+O Leve é um app React; o `streamlit_app.py` só hospeda o build que está em `leve_build/` (servido como componente estático em tela cheia).
+
+No formulário "Deploy an app": repositório `cadueduu/Fritz`, branch `main`, arquivo `streamlit_app.py`.
+
+Ao mudar o código, gere de novo e faça commit do build:
+
+```sh
+npm run build:streamlit
+git add leve_build && git commit -m "Atualiza build"
+```
+
+Dentro do Streamlit o app não registra o service worker (não funciona offline nem é instalável); para isso, use o GitHub Pages.
