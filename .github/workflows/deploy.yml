@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Manual only: the app is published on Streamlit. To also publish on GitHub Pages, enable
+# Settings → Pages → Source: GitHub Actions, then run this from the Actions tab (or add a push trigger).
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -18,8 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
