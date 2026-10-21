@@ -108,7 +108,8 @@ Deno.serve(async (req) => {
 
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) return json({ error: "missing_key" }, 500);
-  const model = Deno.env.get("GEMINI_MODEL") || "gemini-flash-latest";
+  // free-tier models get overloaded (503) or hit per-model quotas (429); fall back down this list
+  const models = [...new Set([Deno.env.get("GEMINI_MODEL") || "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"])];
 
   let body: { messages?: ChatMsg[]; context?: unknown };
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
@@ -128,23 +129,35 @@ Deno.serve(async (req) => {
   const actions: { type: string; [k: string]: unknown }[] = [];
   let text = "";
 
-  for (let turn = 0; turn < 3; turn++) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents,
-        tools: TOOLS,
-        generationConfig: { temperature: 0.4, maxOutputTokens: 8192 },
-      }),
-    });
-    if (!res.ok) {
-      console.error(res.status, await res.text());
-      const error = res.status === 429 ? "rate_limited" : res.status === 400 || res.status === 403 ? "bad_key" : "upstream";
-      return json({ error }, 502);
+  const call = async () => {
+    let last = 0;
+    while (models.length) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${models[0]}:generateContent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM }] },
+            contents,
+            tools: TOOLS,
+            generationConfig: { temperature: 0.4, maxOutputTokens: 8192 },
+          }),
+        });
+        if (res.ok) return { data: await res.json() };
+        last = res.status;
+        console.error(models[0], res.status, await res.text());
+        if (res.status === 400 || res.status === 401 || res.status === 403) return { error: "bad_key" };
+        if (res.status !== 500 && res.status !== 503) break; // 404 / 429: this model won't work now, try the next
+        await new Promise(r => setTimeout(r, 1200 * (attempt + 1)));
+      }
+      models.shift();
     }
-    const data = await res.json();
+    return { error: last === 429 ? "rate_limited" : "overloaded" };
+  };
+
+  for (let turn = 0; turn < 3; turn++) {
+    const { data, error } = await call();
+    if (error) return json({ error }, 502);
     const content: Content | undefined = data.candidates?.[0]?.content;
     if (!content?.parts?.length) {
       if (data.promptFeedback?.blockReason || data.candidates?.[0]?.finishReason === "SAFETY") {

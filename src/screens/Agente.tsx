@@ -78,7 +78,8 @@ function agentContext(s: AppState) {
 const ERRORS: Record<string, string> = {
   missing_key: 'O agente ainda não está configurado: falta a chave do Gemini (GEMINI_API_KEY) no Supabase.',
   bad_key: 'A chave do Gemini configurada no Supabase não é válida ou o modelo não está disponível.',
-  rate_limited: 'O limite gratuito do Gemini foi atingido por agora. Espere um minuto e tente de novo.'
+  rate_limited: 'O limite gratuito do Gemini foi atingido por agora. Espere um minuto e tente de novo.',
+  overloaded: 'A IA gratuita está sobrecarregada agora (isso costuma passar em alguns minutos). Tente de novo daqui a pouco.'
 };
 
 function DietCard({ d }: { d: DietProposal }) {
