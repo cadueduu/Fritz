@@ -4,7 +4,7 @@ import { addEntry, useApp } from '../store/app';
 import { session, startDraft, useSession } from '../store/session';
 import { navigate } from '../hooks/useRoute';
 import { useToast } from '../hooks/useToast';
-import { FAVORITOS, RECENTES, SEARCH, type SearchFood } from '../data/foods';
+import { FAVORITOS, RECENTES, searchFoods, type SearchFood } from '../data/foods';
 import { MEAL_CHIPS, MEAL_LABEL } from '../data/plan';
 import { autoSug, goals, planList, sumEntries } from '../lib/nutrition';
 import { fmt, newId, norm } from '../lib/format';
@@ -35,7 +35,7 @@ export function Registrar() {
   const setMeal = (m: MealId) => session.set(x => ({ ...x, regMeal: m }));
 
   const q = norm(query.trim());
-  const found = q ? SEARCH.filter(r => norm(r.n).includes(q)) : [];
+  const found = q ? searchFoods(query) : [];
   const listSrc = q ? found : tab === 'recentes' ? RECENTES : tab === 'favoritos' ? FAVORITOS : [];
 
   const addTray = (r: { n: string } & Macros) =>
@@ -135,7 +135,7 @@ export function Registrar() {
 
         {(q || tab !== 'plano') && (
           <div className="card flat r20">
-            {listSrc.slice(0, 6).map((r, i) => {
+            {listSrc.slice(0, q ? 20 : 6).map((r, i) => {
               const t = tray.find(x => x.n === r.n);
               return (
                 <div key={r.n} className="result" style={{ borderTopColor: i ? 'var(--line)' : 'transparent' }}>

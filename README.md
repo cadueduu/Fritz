@@ -22,7 +22,7 @@ A URL do projeto e a chave publicável ficam em `.env`. Essa chave foi feita par
 
 ## Ainda simulado
 
-Simulado por enquanto: reconhecimento da foto (sempre o mesmo prato de exemplo), leitura da dieta importada, leitor de código de barras e microfone. A foto tirada aparece de verdade na análise e como miniatura no Diário.
+Simulado por enquanto: leitura da dieta importada, leitor de código de barras e microfone. A foto tirada aparece de verdade na análise e como miniatura no Diário.
 
 ## Desenvolvimento
 
@@ -67,3 +67,13 @@ O cadastro pede nome, data de nascimento, sexo, altura e peso (o peso vira a pri
 Chaves em **Supabase → Edge Functions → Secrets**: `GEMINI_API_KEY` (crie grátis em aistudio.google.com) e, opcional, `GEMINI_MODEL` (padrão `gemini-flash-latest`). No plano gratuito o Google pode usar as conversas para melhorar os produtos dele.
 
 Para publicar mudanças na função: `supabase functions deploy agente`.
+
+## Análise da foto (Supabase Edge Function + Gemini + TACO)
+
+`supabase/functions/analisar` recebe a foto (reduzida para 1024 px), uma descrição em texto ou o nome de um alimento. O Gemini identifica cada alimento, estima a porção em gramas e escolhe o item correspondente da tabela TACO; as calorias e os macros vêm da própria tabela (quando não há item na TACO, fica a estimativa da IA, marcada como "estimativa IA"). No app, cada item precisa ser conferido ("Está certo" ou "Não é isso") e a pessoa informa a refeição e o horário antes de somar ao dia.
+
+A tabela é carregada de `src/data/taco.json` no GitHub (variável `TACO_URL` para trocar). Para publicar mudanças: `supabase functions deploy analisar`.
+
+## Dados da tabela TACO
+
+`src/data/taco.json` (597 alimentos, valores por 100 g) é gerado por `scripts/build-taco.mjs` a partir dos CSVs de [raulfdm/taco-api](https://github.com/raulfdm/taco-api) (MIT). Fonte original: **Tabela Brasileira de Composição de Alimentos – TACO, 4ª edição, NEPA/UNICAMP (2011)**, cuja reprodução é permitida com citação da fonte. A busca do Registrar usa a tabela inteira.
