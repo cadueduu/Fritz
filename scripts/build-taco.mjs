@@ -21,8 +21,9 @@ const cats = Object.fromEntries(parse('categories.csv').map(c => [c.id, c.name])
 const nut = Object.fromEntries(parse('nutrients.csv').map(n => [n.foodId, n]));
 const n = v => (v === '' || v == null ? 0 : Math.round(Number(v) * 10) / 10);
 
-// [id, name, category, kcal, protein, carbs, fat, fiber] per 100 g
-const rows = parse('food.csv').map(f => {
+// [id, name, category, kcal, protein, carbs, fat, fiber] per 100 g; foods the source left without
+// energy (liquid milk, among others) are dropped so they never read as 0 kcal
+const rows = parse('food.csv').filter(f => nut[f.id]?.kcal).map(f => {
   const x = nut[f.id];
   return [Number(f.id), f.name, cats[f.categoryId], n(x.kcal), n(x.protein), n(x.carbohydrates), n(x.lipids), n(x.dietaryFiber)];
 });

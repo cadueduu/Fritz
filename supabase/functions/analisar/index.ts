@@ -26,20 +26,27 @@ const loadTaco = () =>
 const STOP = new Set(["de", "da", "do", "das", "dos", "e", "em", "a", "o", "tipo", "com", "ao", "na", "no", "para"]);
 const SYN: Record<string, string> = { branco: "1", branca: "1" }; // "arroz branco" is "Arroz, tipo 1" in TACO
 const PREP = new Set(["cru", "cozid", "frit", "grelhad", "assad", "refogad", "torrad", "ensopad", "empanad", "milanesa"]);
+// forms that change nutrition many times over: a row with one of these only matches a name that says so
+// ("Leite, de vaca, desnatado" once matched the powder row, 362 kcal/100 g instead of ~35)
+const FORM = new Set(["po", "desidratad", "condensad", "concentrad", "liofilizad"]);
 const stem = (w: string) => w.replace(/(a|o|as|os)$/, "");
 const toks = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/[^a-z0-9]+/).filter(w => w && !STOP.has(w)).map(w => SYN[w] ?? w);
-type Indexed = { r: TacoRow; t: Set<string>; head: string; prep: Set<string> };
+type Indexed = { r: TacoRow; t: Set<string>; head: string; prep: Set<string>; form: string[] };
 const indexRows = (rows: TacoRow[]): Indexed[] =>
-  rows.map(r => { const t = toks(r[1]); return { r, t: new Set(t), head: t[0], prep: new Set(t.map(stem).filter(w => PREP.has(w))) }; });
+  rows.filter(r => r[3] > 0).map(r => { // rows the source left blank read as 0 kcal; the model estimates those
+    const t = toks(r[1]), st = t.map(stem);
+    return { r, t: new Set(t), head: t[0], prep: new Set(st.filter(w => PREP.has(w))), form: st.filter(w => FORM.has(w)) };
+  });
 const findTaco = (index: Indexed[], name: string): TacoRow | null => {
   const g = toks(name);
   if (!g.length) return null;
-  const gPrep = g.map(stem).filter(w => PREP.has(w));
+  const gStems = g.map(stem), gPrep = gStems.filter(w => PREP.has(w));
   let best: TacoRow | null = null, score = 0;
   for (const x of index) {
     if (x.head !== g[0]) continue;
     if (gPrep.length && !gPrep.every(p => x.prep.has(p))) continue;
+    if (!x.form.every(w => gStems.includes(w))) continue;
     const s = (2 * g.filter(w => x.t.has(w)).length) / (g.length + x.t.size);
     if (s > score) { score = s; best = x.r; }
   }
@@ -123,7 +130,13 @@ class AnalysisError extends Error {}
 
 /** Uses the TACO values when the model's TACO-style name is in the table; otherwise keeps its own estimate. */
 const ground = <T extends Food>(index: Indexed[], x: T) => {
-  const t = findTaco(index, String(x.taco || x.nome || ""));
+  let t = findTaco(index, String(x.taco || x.nome || ""));
+  // a match whose energy is far from the model's own estimate is most likely the wrong row
+  const own = Number(x.kcal);
+  if (t && own > 0 && (t[3] > own * 2.5 || t[3] < own / 2.5)) {
+    console.error("TACO match rejected", x.taco || x.nome, "->", t[1], t[3], "vs", own);
+    t = null;
+  }
   return t
     ? { ...x, taco_nome: t[1], fonte: "TACO", kcal: t[3], p: t[4], c: t[5], g: t[6], f: t[7] }
     : { ...x, taco_nome: null, fonte: "IA" };
