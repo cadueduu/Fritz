@@ -9,6 +9,8 @@ import Anthropic from "npm:@anthropic-ai/sdk@1.0.0";
 
 // Haiku misread plates that Gemini got right; Sonnet is the fallback for its stronger vision
 const CLAUDE_MODEL = "claude-sonnet-5-5";
+// a single typed food name is quick text work: Haiku answers in a few seconds while Gemini queues
+const LOOKUP_MODEL = "claude-haiku-5-5";
 
 // The TACO table lives in the repo (src/data/taco.json, built by scripts/build-taco.mjs); load it once per instance.
 type TacoRow = [number, string, string, number, number, number, number, number];
@@ -169,19 +171,19 @@ Deno.serve(async (req) => {
   }
   const mime = body.mime || "image/jpeg";
 
-  const viaClaude = async (): Promise<Analysis> => {
+  const viaClaude = async (model = CLAUDE_MODEL, effort: "low" | "medium" = "medium", maxRetries = 2): Promise<Analysis> => {
     if (!anthropicKey) throw new AnalysisError("missing_key");
     const claude = new Anthropic({ apiKey: anthropicKey });
     const content: Anthropic.ContentBlockParam[] = body.imagem
       ? [{ type: "image", source: { type: "base64", media_type: mime as "image/jpeg", data: body.imagem } }, { type: "text", text: prompt }]
       : [{ type: "text", text: prompt }];
     const res = await claude.messages.create({
-      model: CLAUDE_MODEL,
+      model,
       max_tokens: 4096,
       system: SYSTEM,
-      output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
+      output_config: { effort, format: { type: "json_schema", schema: SCHEMA } },
       messages: [{ role: "user", content }],
-    });
+    }, { maxRetries });
     if (res.stop_reason === "refusal") return { itens: [], aviso: "Não consegui analisar esta imagem." };
     return JSON.parse(res.content.filter(b => b.type === "text").map(b => (b as Anthropic.TextBlock).text).join(""));
   };
@@ -232,6 +234,14 @@ Deno.serve(async (req) => {
       : "overloaded";
 
   let out: Analysis;
+  if (body.alimento && anthropicKey && !body.imagem) {
+    try {
+      out = await viaClaude(LOOKUP_MODEL, "low", 0); // on failure go straight to Gemini
+      return respond(out);
+    } catch (err) {
+      console.error("haiku lookup failed, trying gemini", err);
+    }
+  }
   try {
     out = await viaGemini();
   } catch (geminiErr) {
@@ -246,10 +256,15 @@ Deno.serve(async (req) => {
     }
   }
 
+  return respond(out);
+});
+
+/** Looks each food up in TACO and sends the result to the app. */
+async function respond(out: Analysis) {
   const index = indexRows(await loadTaco());
   const itens = (Array.isArray(out.itens) ? out.itens : []).map(i => ({
     ...ground(index, i),
     alternativas: (Array.isArray(i.alternativas) ? i.alternativas : []).map(a => ground(index, a)),
   }));
   return json({ itens, aviso: typeof out.aviso === "string" ? out.aviso : "" });
-});
+}

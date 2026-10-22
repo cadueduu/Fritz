@@ -10,6 +10,7 @@ import { clamp, fmt, newId } from '../lib/format';
 import { nowTime, todayKey } from '../lib/dates';
 import { thumbnail, toJpegBase64 } from '../lib/image';
 import { supabase } from '../lib/supabase';
+import { searchFoods, type SearchFood } from '../data/foods';
 import { MacroTiles } from '../components/MacroTiles';
 import './Analise.css';
 
@@ -49,6 +50,30 @@ const toItem = (r: Raw): Item => ({
   alts: (Array.isArray(r.alternativas) ? r.alternativas : []).slice(0, 3).map(food),
   status: 'pendente'
 });
+/** A food from the app's own table, per 100 g, plus the grams of its listed portion. */
+const fromSearch = (f: SearchFood): Food100 & { porcao: number } => {
+  const porcao = Number(/(\d+(?:[.,]\d+)?)\s*(?:g|ml)\b/.exec(f.portion)?.[1].replace(',', '.')) || 100;
+  const k = 100 / porcao;
+  return { nome: f.n, taco_nome: f.src === 'TACO' ? f.n : null, fonte: f.src === 'TACO' ? 'TACO' : 'IA', kcal: f.kcal * k, p: f.p * k, c: f.c * k, g: f.g * k, f: f.f * k, porcao };
+};
+
+/** Matches from the app's food table while the person types, so picking one needs no AI call. */
+function Suggestions({ query, onPick }: { query: string; onPick: (f: Food100 & { porcao: number }) => void }) {
+  // amounts and household measures ("1 copo de suco de laranja") are not part of a food's name
+  const q = query.replace(/\d+([.,]\d+)?/g, ' ').replace(/\b(g|ml|kg|un|unidades?|copos?|x[ií]caras?|colher(es)?|sopa|ch[aá]|fatias?|por[cç](ão|ões)|pratos?|potes?|de|do|da|com)\b/gi, ' ');
+  const hits = q.trim().length >= 2 ? searchFoods(q, 6) : [];
+  if (!hits.length) return null;
+  return (
+    <div className="sugs" role="listbox" aria-label="Alimentos da tabela">
+      {hits.map(h => (
+        <button key={h.n + h.portion} className="sug" role="option" aria-selected={false} onClick={() => onPick(fromSearch(h))}>
+          <span>{h.n}</span><span className="muted num">{fmt(h.kcal)} kcal · {h.portion}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const per = (it: Food100, gramas: number): Macros => ({ kcal: it.kcal * gramas / 100, p: it.p * gramas / 100, c: it.c * gramas / 100, g: it.g * gramas / 100, f: it.f * gramas / 100 });
 
 /** Calls the `analisar` function; throws an Error whose message is an ERRORS key or ''. */
@@ -162,6 +187,17 @@ export function Analise() {
   const pickAlt = (key: string, alt: Food100) => {
     update(key, it => ({ ...it, ...alt, alts: [food(it), ...it.alts.filter(a => a !== alt)], conf: 100, status: 'corrigido' }));
     setCorrecting(null);
+  };
+  const pickFood = (key: string, f: Food100 & { porcao: number }) => {
+    const { porcao: _p, ...rest } = f;
+    update(key, it => ({ ...it, ...rest, alts: [food(it), ...it.alts], conf: 100, status: 'corrigido' }));
+    setOther('');
+    setCorrecting(null);
+  };
+  const addFood = (f: Food100 & { porcao: number }) => {
+    const { porcao, ...rest } = f;
+    setItems(its => [...its, { ...rest, key: newId(), gramas: Math.round(porcao), conf: 100, alts: [], status: 'ok' }]);
+    setAdding('');
   };
   const typeOther = async (key: string) => {
     const name = other.trim();
@@ -351,6 +387,7 @@ export function Analise() {
                           <input className="other-in" value={other} onChange={e => setOther(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') typeOther(x.key); }} placeholder="Ex.: carne moída" aria-label="Nome do alimento" />
                           <button className="btn pri h44" onClick={() => typeOther(x.key)} disabled={x.busy || !other.trim()}>{x.busy ? '…' : 'Usar'}</button>
                         </div>
+                        <Suggestions query={other} onPick={f => pickFood(x.key, f)} />
                         <div className="row-between">
                           <button className="remove" onClick={() => { setItems(its => its.filter(it => it.key !== x.key)); setCorrecting(null); }}>Não estava no prato · remover</button>
                           <button className="link-btn" style={{ padding: 0 }} onClick={() => setCorrecting(null)}>Fechar</button>
@@ -367,6 +404,7 @@ export function Analise() {
                   <input className="other-in" value={adding} onChange={e => setAdding(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addItem(); }} placeholder="Ex.: 1 copo de suco de laranja" aria-label="Adicionar item" />
                   <button className="btn sec h44" onClick={addItem} disabled={addBusy || !adding.trim()}>{addBusy ? '…' : '+ Adicionar'}</button>
                 </div>
+                <Suggestions query={adding} onPick={addFood} />
               </section>
               {failure && <div className="warn-box" role="alert">{failure}</div>}
               <div className="note"><span className="i">i</span><span>Estimativas por foto são aproximadas: confira alimentos e quantidades. Valores nutricionais da tabela TACO (NEPA/UNICAMP) quando disponíveis. Ajustes na dieta devem ser validados com seu nutrólogo.</span></div>

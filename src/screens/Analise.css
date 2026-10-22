@@ -70,3 +70,7 @@
 .other-in { flex: 1; min-width: 0; font-weight: 500; }
 .time-in:focus, .other-in:focus { border-color: var(--pri); }
 .ana-bar .btn:disabled { opacity: 1; background: var(--card2); color: var(--ink2); }
+.sugs { display: flex; flex-direction: column; gap: 6px; }
+.sug { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 12px; background: var(--card); color: var(--ink); text-align: left; font: 500 calc(14 * var(--u)) var(--font); box-shadow: var(--shadow); }
+.sug > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.sug > span:last-child { flex: none; font-size: calc(12 * var(--u)); }
