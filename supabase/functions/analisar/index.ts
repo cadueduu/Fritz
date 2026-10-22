@@ -11,6 +11,8 @@ import Anthropic from "npm:@anthropic-ai/sdk@1.0.0";
 const CLAUDE_MODEL = "claude-sonnet-5-5";
 // a single typed food name is quick text work: Haiku answers in a few seconds while Gemini queues
 const LOOKUP_MODEL = "claude-haiku-5-5";
+// a Gemini call once hung until the platform killed the function at 150 s; past this Claude answers
+const GEMINI_CALL_MS = 45_000;
 
 // The TACO table lives in the repo (src/data/taco.json, built by scripts/build-taco.mjs); load it once per instance.
 type TacoRow = [number, string, string, number, number, number, number, number];
@@ -197,22 +199,29 @@ Deno.serve(async (req) => {
     let last = 0;
     while (models.length) {
       for (let attempt = 0; attempt < 2; attempt++) {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${models[0]}:generateContent`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: SYSTEM }] },
-            contents: [{ role: "user", parts }],
-            generationConfig: {
-              temperature: 0.2, maxOutputTokens: 4096, responseMimeType: "application/json", responseSchema: GEMINI_SCHEMA,
-              ...(thinking && { thinkingConfig: thinking }),
-            },
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const text = (data.candidates?.[0]?.content?.parts ?? []).filter((p: { text?: string; thought?: boolean }) => p.text && !p.thought).map((p: { text: string }) => p.text).join("");
-          try { return JSON.parse(text); } catch { console.error("bad gemini json", text.slice(0, 300)); last = 502; break; }
+        let res: Response;
+        try {
+          res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${models[0]}:generateContent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+            signal: AbortSignal.timeout(GEMINI_CALL_MS),
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: SYSTEM }] },
+              contents: [{ role: "user", parts }],
+              generationConfig: {
+                temperature: 0.2, maxOutputTokens: 4096, responseMimeType: "application/json", responseSchema: GEMINI_SCHEMA,
+                ...(thinking && { thinkingConfig: thinking }),
+              },
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const text = (data.candidates?.[0]?.content?.parts ?? []).filter((p: { text?: string; thought?: boolean }) => p.text && !p.thought).map((p: { text: string }) => p.text).join("");
+            try { return JSON.parse(text); } catch { console.error("bad gemini json", text.slice(0, 300)); last = 502; break; }
+          }
+        } catch (err) {
+          console.error("gemini", models[0], "no answer in", GEMINI_CALL_MS, "ms", err);
+          throw new AnalysisError("overloaded");
         }
         last = res.status;
         const detail = await res.text();

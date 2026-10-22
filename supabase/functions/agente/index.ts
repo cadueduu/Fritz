@@ -14,6 +14,7 @@ const CORS = {
 };
 
 const CHAT_MODEL_FALLBACK = "claude-haiku-5-5";
+const GEMINI_CALL_MS = 15_000;
 const DIET_MODEL = "claude-sonnet-5-5";
 
 const SYSTEM = `Você é o Agente Leve, assistente de nutrição de um app brasileiro. Fale em português do Brasil, de forma direta, acolhedora e sem culpa. Junto com cada mensagem você recebe os dados atuais da pessoa em JSON (perfil, objetivo, rotina, preferências, anamnese já respondida, metas, plano, registros, água e pesagens). Use esses dados de verdade: cite números, compare com as metas, aponte padrões.
@@ -228,22 +229,28 @@ Deno.serve(async (req) => {
     let text = "";
     const call = async () => {
       let last = 0;
-      while (models.length) {
-        for (let attempt = 0; attempt < 2; attempt++) {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${models[0]}:generateContent`, {
+      for (const model of models) {
+        let res: Response;
+        try {
+          res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+            // a call once hung until the platform killed the function at 150 s; past this Claude answers
+            signal: AbortSignal.timeout(GEMINI_CALL_MS),
             body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM }] }, contents, tools: GEMINI_TOOLS, generationConfig: { temperature: 0.4, maxOutputTokens: 8192 } }),
           });
           if (res.ok) return await res.json();
-          last = res.status;
-          console.error("gemini", models[0], res.status, await res.text());
-          if (res.status === 400 || res.status === 401 || res.status === 403) throw new ChatError("bad_key");
-          if (res.status === 402) throw new ChatError("no_credits");
-          if (res.status !== 500 && res.status !== 503) break; // 404 / 429: try the next model
-          await new Promise(r => setTimeout(r, 1200 * (attempt + 1)));
+        } catch (err) {
+          console.error("gemini", model, "no answer in", GEMINI_CALL_MS, "ms", err);
+          throw new ChatError("overloaded");
         }
-        models.shift();
+        last = res.status;
+        console.error("gemini", model, res.status, await res.text());
+        if (res.status === 400 || res.status === 401 || res.status === 403) throw new ChatError("bad_key");
+        if (res.status === 402) throw new ChatError("no_credits");
+        // overloaded: Claude answers now instead of waiting through retries
+        if (res.status >= 500) throw new ChatError("overloaded");
+        // 404 / 429: try the next model
       }
       throw new ChatError(last === 429 ? "rate_limited" : "overloaded");
     };
