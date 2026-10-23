@@ -9,7 +9,7 @@ import Anthropic from "npm:@anthropic-ai/sdk@1.0.0";
 
 // Haiku misread plates that Gemini got right; Sonnet is the fallback for its stronger vision
 const CLAUDE_MODEL = "claude-sonnet-5-5";
-// a single typed food name is quick text work: Haiku answers in a few seconds while Gemini queues
+// typed meals and food names are quick text work: Haiku answers in a few seconds while Gemini queues
 const LOOKUP_MODEL = "claude-haiku-5-5";
 // a Gemini call once hung until the platform killed the function at 150 s; past this Claude answers
 const GEMINI_CALL_MS = 45_000;
@@ -243,12 +243,12 @@ Deno.serve(async (req) => {
       : "overloaded";
 
   let out: Analysis;
-  if (body.alimento && anthropicKey && !body.imagem) {
+  if (!body.imagem && anthropicKey) {
     try {
       out = await viaClaude(LOOKUP_MODEL, "low", 0); // on failure go straight to Gemini
       return respond(out);
     } catch (err) {
-      console.error("haiku lookup failed, trying gemini", err);
+      console.error("haiku text failed, trying gemini", err);
     }
   }
   try {

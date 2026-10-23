@@ -56,7 +56,8 @@ Dentro do Streamlit o app não registra o service worker, então não funciona o
 |---|---|---|
 | Conversa do agente (anamnese, dúvidas, registrar refeição/peso/água, análise da semana) | Google Gemini (`gemini-flash-latest`, plano gratuito) | Claude Haiku 5.5 |
 | Montar a dieta (ferramenta `montar_dieta` chamada pela conversa) | Claude Sonnet 5.5 | — (`fallbacks: "default"` da Anthropic) |
-| Análise da foto, da descrição e de um alimento digitado | Google Gemini | Claude Sonnet 5.5 |
+| Análise da foto | Google Gemini | Claude Sonnet 5.5 |
+| Refeição descrita em texto e alimento digitado | Claude Haiku 5.5 | Gemini |
 
 Chaves em **Supabase → Edge Functions → Secrets**: `ANTHROPIC_API_KEY` e `GEMINI_API_KEY` (de um projeto **sem cobrança** no Google AI Studio, para usar o plano gratuito). Opcional: `GEMINI_MODEL`. No plano gratuito o Google pode usar as conversas para melhorar os produtos dele; fotos e dietas vão para a Anthropic.
 
